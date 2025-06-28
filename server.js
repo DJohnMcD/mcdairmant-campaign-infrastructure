@@ -21,7 +21,7 @@ const APPROVED_EMAILS = [
   'john@mcdairmant.com',
   'campaign@mcdairmant.com',
   'staff@mcdairmant.com',
-  'djohnmcd@gmail.com', // Add your actual email here
+  'djclownproductions@gmail.com', // Your actual email
   // Add team member emails here
 ];
 
