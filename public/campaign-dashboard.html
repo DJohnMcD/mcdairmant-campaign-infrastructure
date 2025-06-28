@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NY-24 Campaign Operations Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .campaign-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .district-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .notification-icon {
+            position: relative;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .card-action {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .priority-list {
+            list-style: none;
+        }
+        
+        .priority-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .priority-item:last-child {
+            border-bottom: none;
+        }
+        
+        .priority-text {
+            flex: 1;
+        }
+        
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .priority-high {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .priority-medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .priority-low {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .quick-action-btn {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #374151;
+        }
+        
+        .quick-action-btn:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+        }
+        
+        .agent-chat {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        
+        .message-user {
+            background: #3b82f6;
+            color: white;
+            margin-left: 2rem;
+        }
+        
+        .message-agent {
+            background: white;
+            border: 1px solid #e5e7eb;
+            margin-right: 2rem;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .campaign-title {
+                font-size: 1rem;
+            }
+            
+            .main-container {
+                padding: 0.5rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-card {
+                padding: 1rem;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 1rem;
+            }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background: #10b981;
+        }
+        
+        .status-warning {
+            background: #f59e0b;
+        }
+        
+        .status-offline {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <span class="campaign-title">McDairmant for Congress</span>
+                <span class="district-badge">NY-24</span>
+            </div>
+            <div class="user-menu">
+                <div class="notification-icon" onclick="showNotifications()">
+                    🔔
+                    <span class="notification-badge" id="notificationCount">3</span>
+                </div>
+                <a href="/logout" class="card-action">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Today's Priorities -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">📋 Today's Priorities</h2>
+                <span id="currentDate"></span>
+            </div>
+            <ul class="priority-list" id="dailyPriorities">
+                <li class="priority-item">
+                    <span class="priority-text">Review 5 pending expense classifications</span>
+                    <span class="priority-badge priority-high">HIGH</span>
+                </li>
+                <li class="priority-item">
+                    <span class="priority-text">Deposit $247 in cash receipts</span>
+                    <span class="priority-badge priority-medium">MEDIUM</span>
+                </li>
+                <li class="priority-item">
+                    <span class="priority-text">Upload bank statement for reconciliation</span>
+                    <span class="priority-badge priority-low">LOW</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Campaign Metrics -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Campaign Metrics</h2>
+                    <button class="card-action" onclick="refreshMetrics()">Refresh</button>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-value" id="totalDonors">0</div>
+                        <div class="metric-label">Total Donors</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="totalRaised">$0</div>
+                        <div class="metric-label">Total Raised</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="voterContacts">0</div>
+                        <div class="metric-label">Voter Contacts</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="daysToElection">0</div>
+                        <div class="metric-label">Days to Election</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Tracking -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">💰 Financial Tracking</h2>
+                    <button class="card-action" onclick="showExpenseForm()">Add Expense</button>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-value" id="pendingExpenses">0</div>
+                        <div class="metric-label">Pending Classification</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value" id="cashReceipts">$0</div>
+                        <div class="metric-label">Undeposited Cash</div>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="showCashReceiptForm()">
+                        📱<br>Record Cash
+                    </button>
+                    <button class="quick-action-btn" onclick="showBankUpload()">
+                        📄<br>Upload Statement
+                    </button>
+                    <button class="quick-action-btn" onclick="runReconciliation()">
+                        🔄<br>Auto Reconcile
+                    </button>
+                </div>
+            </div>
+
+            <!-- FEC Compliance -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">⚖️ FEC Compliance</h2>
+                    <button class="card-action" onclick="generateFECReport()">Generate Report</button>
+                </div>
+                <ul class="priority-list">
+                    <li class="priority-item">
+                        <span class="priority-text">
+                            <span class="status-indicator status-online"></span>
+                            All contributions within limits
+                        </span>
+                    </li>
+                    <li class="priority-item">
+                        <span class="priority-text">
+                            <span class="status-indicator status-warning"></span>
+                            3 donors approaching $200 threshold
+                        </span>
+                    </li>
+                    <li class="priority-item">
+                        <span class="priority-text">
+                            <span class="status-indicator status-online"></span>
+                            No compliance issues detected
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- AI Agents Quick Access -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">🤖 Campaign AI Agents</h2>
+                </div>
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="chatWithAgent('martin')">
+                        🎯<br>Martin<br><small>Strategy</small>
+                    </button>
+                    <button class="quick-action-btn" onclick="chatWithAgent('eggsy')">
+                        🎨<br>Eggsy<br><small>Creative</small>
+                    </button>
+                    <button class="quick-action-btn" onclick="chatWithAgent('ethel')">
+                        ⚖️<br>Ethel<br><small>Legal</small>
+                    </button>
+                    <button class="quick-action-btn" onclick="chatWithAgent('terri')">
+                        🔒<br>Terri<br><small>Private</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Form Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Expense</h3>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label class="form-label">Vendor Name</label>
+                    <input type="text" class="form-input" name="vendor_name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-input" name="description" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount ($)</label>
+                    <input type="number" step="0.01" class="form-input" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" name="expense_date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-select" name="payment_method">
+                        <option value="credit_card">Credit Card</option>
+                        <option value="debit_card">Debit Card</option>
+                        <option value="cash">Cash</option>
+                        <option value="check">Check</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Add Expense</button>
+                <button type="button" class="btn-secondary" onclick="closeModal('expenseModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cash Receipt Form Modal -->
+    <div id="cashReceiptModal" class="modal">
+        <div class="modal-content">
+            <h3>Record Cash Receipt</h3>
+            <form id="cashReceiptForm">
+                <div class="form-group">
+                    <label class="form-label">Amount ($)</label>
+                    <input type="number" step="0.01" class="form-input" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Source</label>
+                    <select class="form-select" name="source">
+                        <option value="can_collection">Can Collection</option>
+                        <option value="event_donation">Event Donation</option>
+                        <option value="merchandise">Merchandise Sale</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" name="location" placeholder="Where was this collected?">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Collector Name</label>
+                    <input type="text" class="form-input" name="collector_name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" name="receipt_date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <input type="text" class="form-input" name="notes" placeholder="Any additional details">
+                </div>
+                <button type="submit" class="btn-primary">Record Receipt</button>
+                <button type="button" class="btn-secondary" onclick="closeModal('cashReceiptModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Agent Chat Modal -->
+    <div id="agentChatModal" class="modal">
+        <div class="modal-content">
+            <h3 id="agentChatTitle">Chat with Agent</h3>
+            <div class="agent-chat" id="agentChatHistory"></div>
+            <div class="chat-input">
+                <input type="text" class="form-input" id="agentMessageInput" placeholder="Type your message...">
+                <button class="btn-primary" onclick="sendAgentMessage()">Send</button>
+            </div>
+            <button type="button" class="btn-secondary" onclick="closeModal('agentChatModal')" style="margin-top: 1rem;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            loadDashboardMetrics();
+            loadPendingTasks();
+            
+            // Set today's date as default for forms
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('input[name="expense_date"]').value = today;
+            document.querySelector('input[name="receipt_date"]').value = today;
+        });
+
+        function updateCurrentDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', options);
+            
+            // Calculate days to election (November 3, 2026)
+            const electionDay = new Date('2026-11-03');
+            const diffTime = electionDay - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('daysToElection').textContent = diffDays;
+        }
+
+        async function loadDashboardMetrics() {
+            try {
+                // Load donor metrics
+                const donorsResponse = await fetch('/api/campaign/donors');
+                const donors = await donorsResponse.json();
+                
+                document.getElementById('totalDonors').textContent = donors.length;
+                
+                const totalRaised = donors.reduce((sum, donor) => sum + parseFloat(donor.contribution_amount || 0), 0);
+                document.getElementById('totalRaised').textContent = '$' + totalRaised.toLocaleString();
+
+                // Load expense metrics
+                const expensesResponse = await fetch('/api/expenses?classification=pending');
+                const pendingExpenses = await expensesResponse.json();
+                document.getElementById('pendingExpenses').textContent = pendingExpenses.length;
+
+                // Load cash receipts
+                const receiptsResponse = await fetch('/api/receipts/cash?deposited=false');
+                const cashReceipts = await receiptsResponse.json();
+                const undepositedCash = cashReceipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount || 0), 0);
+                document.getElementById('cashReceipts').textContent = '$' + undepositedCash.toLocaleString();
+
+            } catch (error) {
+                console.error('Error loading dashboard metrics:', error);
+            }
+        }
+
+        async function loadPendingTasks() {
+            // This would load actual pending tasks from the API
+            // For now, showing static examples
+        }
+
+        function showExpenseForm() {
+            document.getElementById('expenseModal').style.display = 'block';
+        }
+
+        function showCashReceiptForm() {
+            document.getElementById('cashReceiptModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function submitExpense(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const expenseData = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/expenses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(expenseData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Expense added successfully! Classification: ' + result.classification.classification);
+                    closeModal('expenseModal');
+                    loadDashboardMetrics();
+                    event.target.reset();
+                } else {
+                    alert('Error adding expense');
+                }
+            } catch (error) {
+                console.error('Error submitting expense:', error);
+                alert('Error adding expense');
+            }
+        }
+
+        async function submitCashReceipt(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const receiptData = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/receipts/cash', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(receiptData)
+                });
+
+                if (response.ok) {
+                    alert('Cash receipt recorded successfully!');
+                    closeModal('cashReceiptModal');
+                    loadDashboardMetrics();
+                    event.target.reset();
+                } else {
+                    alert('Error recording cash receipt');
+                }
+            } catch (error) {
+                console.error('Error submitting cash receipt:', error);
+                alert('Error recording cash receipt');
+            }
+        }
+
+        function chatWithAgent(agentName) {
+            document.getElementById('agentChatTitle').textContent = 'Chat with ' + agentName.charAt(0).toUpperCase() + agentName.slice(1);
+            document.getElementById('agentChatHistory').innerHTML = '';
+            document.getElementById('agentChatModal').style.display = 'block';
+            document.getElementById('agentChatModal').dataset.agent = agentName;
+        }
+
+        async function sendAgentMessage() {
+            const input = document.getElementById('agentMessageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const agentName = document.getElementById('agentChatModal').dataset.agent;
+            const chatHistory = document.getElementById('agentChatHistory');
+
+            // Add user message
+            chatHistory.innerHTML += `<div class="message message-user">${message}</div>`;
+            input.value = '';
+
+            try {
+                const response = await fetch(`/api/agent/${agentName}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    chatHistory.innerHTML += `<div class="message message-agent">${result.response}</div>`;
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                } else {
+                    chatHistory.innerHTML += `<div class="message message-agent">Sorry, I'm having trouble responding right now.</div>`;
+                }
+            } catch (error) {
+                console.error('Error sending message to agent:', error);
+                chatHistory.innerHTML += `<div class="message message-agent">Sorry, I'm having trouble responding right now.</div>`;
+            }
+        }
+
+        async function runReconciliation() {
+            try {
+                const response = await fetch('/api/reconciliation/auto-match', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Reconciliation complete: ${result.matches_created} matches created`);
+                    loadDashboardMetrics();
+                } else {
+                    alert('Error running reconciliation');
+                }
+            } catch (error) {
+                console.error('Error running reconciliation:', error);
+                alert('Error running reconciliation');
+            }
+        }
+
+        async function generateFECReport() {
+            try {
+                const response = await fetch('/api/compliance/expense-report?format=csv');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'fec_expense_report.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error generating FEC report:', error);
+                alert('Error generating FEC report');
+            }
+        }
+
+        function refreshMetrics() {
+            loadDashboardMetrics();
+            alert('Metrics refreshed!');
+        }
+
+        function showNotifications() {
+            alert('Notifications:\n- 3 new donations to process\n- Bank statement ready for upload\n- FEC quarterly report due in 15 days');
+        }
+
+        function showBankUpload() {
+            // This would open a file upload dialog
+            alert('Bank statement upload feature coming soon!');
+        }
+
+        // Form event listeners
+        document.getElementById('expenseForm').addEventListener('submit', submitExpense);
+        document.getElementById('cashReceiptForm').addEventListener('submit', submitCashReceipt);
+
+        // Enter key support for agent chat
+        document.getElementById('agentMessageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAgentMessage();
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

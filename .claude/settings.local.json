@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(pkill:*)",
+      "Bash(brew:*)",
+      "Bash(mkdir:*)",
+      "Bash(node:*)",
+      "Bash(chmod:*)"
+    ],
+    "deny": []
+  }
+}

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal AI Assistant - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: #007AFF;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 2rem;
+        }
+        
+        .quick-input-bar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 2rem;
+        }
+        
+        .quick-input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        #quickInput {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 40px;
+            max-height: 120px;
+        }
+        
+        .quick-submit-btn {
+            padding: 0.75rem 1.5rem;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .quick-submit-btn:hover {
+            background: #0056b3;
+        }
+        
+        .input-method {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        
+        .input-method:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+        
+        .input-method.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+        
+        .input-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        
+        .input-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .input-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .agent-selector {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .agent-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .agent-tab {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        
+        .agent-tab:hover {
+            background: #e9ecef;
+        }
+        
+        .agent-tab.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+        
+        .terri-link {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(255, 107, 53, 0.1));
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        .content-area {
+            padding: 2rem;
+        }
+        
+        .input-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .input-section h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .input-methods {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .method-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .method-btn.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+        
+        #contentInput {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+        }
+        
+        .input-help {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .submit-btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 1rem;
+        }
+        
+        .submit-btn:hover {
+            background: #0056CC;
+        }
+        
+        .agent-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .agent-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-greeting {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        
+        .suggestions {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+        
+        .suggestions h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .suggestions ul {
+            margin-left: 1rem;
+        }
+        
+        .suggestions li {
+            margin-bottom: 0.25rem;
+            color: #555;
+        }
+        
+        .entries-section {
+            margin-top: 2rem;
+        }
+        
+        .entry-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #007AFF;
+        }
+        
+        .entry-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .entry-content {
+            color: #333;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Personal AI Assistant</h1>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+    
+    <!-- Quick Input Bar -->
+    <div class="quick-input-bar">
+        <div class="quick-input-container">
+            <textarea id="quickInput" placeholder="Quick entry - what's on your mind?" rows="1"></textarea>
+            <button onclick="submitQuickEntry()" class="quick-submit-btn">Add</button>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="sidebar">
+            <h3 style="margin-bottom: 1rem; color: #333;">Input Methods</h3>
+            
+            <!-- Voice Input -->
+            <div class="input-method" onclick="selectInputMethod('voice')">
+                <div class="input-icon">🎤</div>
+                <div class="input-details">
+                    <div class="input-name">Voice Recording</div>
+                    <div class="input-desc">Record audio memos</div>
+                </div>
+            </div>
+            
+            <!-- Photo Input -->
+            <div class="input-method" onclick="selectInputMethod('photo')">
+                <div class="input-icon">📷</div>
+                <div class="input-details">
+                    <div class="input-name">Photo Upload</div>
+                    <div class="input-desc">Handwritten notes & docs</div>
+                </div>
+            </div>
+            
+            <!-- File Input -->
+            <div class="input-method" onclick="selectInputMethod('file')">
+                <div class="input-icon">📄</div>
+                <div class="input-details">
+                    <div class="input-name">File Upload</div>
+                    <div class="input-desc">Documents & attachments</div>
+                </div>
+            </div>
+            
+            <!-- Text Input -->
+            <div class="input-method active" onclick="selectInputMethod('text')">
+                <div class="input-icon">✍️</div>
+                <div class="input-details">
+                    <div class="input-name">Text Entry</div>
+                    <div class="input-desc">Detailed text input</div>
+                </div>
+            </div>
+            
+            <div class="agent-selector">
+                <h4 style="margin: 2rem 0 1rem 0; color: #333;">Choose Agent</h4>
+                <div class="agent-tabs">
+                    <div class="agent-tab active" data-agent="martin">Martin</div>
+                    <div class="agent-tab" data-agent="eggsy">Eggsy</div>
+                    <div class="agent-tab" data-agent="ethel">Ethel</div>
+                </div>
+                <div class="terri-link">
+                    <a href="/terri" style="color: #8B5CF6; text-decoration: none; font-style: italic;">🌺 Chat with Terri privately →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="input-section">
+                <h2>Share Your Thoughts</h2>
+                <div class="input-methods">
+                    <button class="method-btn active" data-method="text">Text Entry</button>
+                    <button class="method-btn" data-method="voice">Voice Memo</button>
+                    <button class="method-btn" data-method="photo">Photo Upload</button>
+                </div>
+                
+                <div id="textInput">
+                    <textarea id="contentInput" placeholder="Write your thoughts, tasks, or reflections here...
+
+Examples:
+- <task>Email grad school recommenders</task>
+- <journal>Feeling overwhelmed with the studio mess</journal>  
+- Just had a great meeting with the team about NetSuite
+- <note>Remember to call contractor about HVAC</note>"></textarea>
+                    <div class="input-help">
+                        Use tags like &lt;task&gt;, &lt;journal&gt;, &lt;note&gt; to help categorize, or let the system auto-detect
+                    </div>
+                </div>
+                
+                <div id="voiceInput" class="hidden">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button id="recordBtn" onclick="toggleRecording()" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">🎤 Start Recording</button>
+                            <span id="recordingStatus" style="color: #666; font-size: 0.9rem;"></span>
+                        </div>
+                        <textarea id="voiceTranscript" placeholder="Voice transcript will appear here..." style="width: 100%; height: 100px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px; resize: vertical;"></textarea>
+                        <div style="font-size: 0.9rem; color: #666;">Note: Transcript will be automatically added to your main input above.</div>
+                    </div>
+                </div>
+                
+                <div id="photoInput" class="hidden">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <input type="file" id="photoFile" accept="image/*" style="margin-bottom: 0.5rem;">
+                        <div id="photoPreview" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; border-radius: 3px; display: none;">
+                            <img id="previewImg" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+                        <button onclick="processPhoto()" style="padding: 0.5rem 1rem; background: #007AFF; color: white; border: none; border-radius: 3px; cursor: pointer;">📸 Process Image</button>
+                        <div style="font-size: 0.9rem; color: #666;">Upload handwritten notes or documents. Text will be extracted and added to your input above.</div>
+                    </div>
+                </div>
+                
+                <button class="submit-btn" onclick="submitEntry()">Submit</button>
+            </div>
+            
+            <div class="agent-section">
+                <div class="agent-header">
+                    <h2 id="currentAgentName">Martin Manager</h2>
+                    <div id="currentAgentRole">Strategic oversight and task coordination</div>
+                </div>
+                <div id="currentAgentGreeting" class="agent-greeting">
+                    Ready to help you prioritize and coordinate your tasks strategically.
+                </div>
+                
+                <div class="suggestions">
+                    <h4>Today's Suggestions:</h4>
+                    <ul id="currentAgentSuggestions">
+                        <li>Schedule dedicated time blocks for overdue tasks</li>
+                        <li>Break large tasks into smaller, manageable steps</li>
+                        <li>Identify which tasks truly need your personal attention</li>
+                    </ul>
+                </div>
+                
+                <div class="entries-section">
+                    <h4>Recent Entries:</h4>
+                    <div id="entriesList">
+                        <!-- Entries will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="agent-chat" style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <h4>Chat with <span id="chatAgentName">Martin</span></h4>
+                    <div id="chatMessages" style="max-height: 300px; overflow-y: auto; margin: 1rem 0; padding: 0.5rem; background: white; border-radius: 3px;">
+                        <!-- Chat messages will appear here -->
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="chatInput" placeholder="Ask me anything..." style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px;">
+                        <button onclick="sendMessage()" style="padding: 0.5rem 1rem; background: #007AFF; color: white; border: none; border-radius: 3px; cursor: pointer;">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentAgent = 'martin';
+        
+        // Agent switching
+        document.querySelectorAll('.agent-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentAgent = item.dataset.agent;
+                loadAgent(currentAgent);
+            });
+        });
+        
+        // Input method switching
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                document.querySelectorAll('#textInput, #voiceInput, #photoInput').forEach(div => {
+                    div.classList.add('hidden');
+                });
+                
+                document.getElementById(btn.dataset.method + 'Input').classList.remove('hidden');
+            });
+        });
+        
+        async function loadAgent(agentName) {
+            try {
+                // Add cache busting parameter
+                const response = await fetch(`/api/agent/${agentName}?v=${Date.now()}`);
+                const agent = await response.json();
+                console.log('Loaded agent:', agent); // Debug log
+                
+                document.getElementById('currentAgentName').textContent = agent.name;
+                document.getElementById('currentAgentRole').textContent = agent.role;
+                document.getElementById('currentAgentGreeting').textContent = agent.greeting;
+                document.getElementById('chatAgentName').textContent = agent.name;
+                
+                const suggestionsList = document.getElementById('currentAgentSuggestions');
+                suggestionsList.innerHTML = '';
+                agent.suggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    suggestionsList.appendChild(li);
+                });
+                
+                loadEntries(agentName);
+                clearChat();
+            } catch (error) {
+                console.error('Error loading agent:', error);
+            }
+        }
+        
+        async function loadEntries(agentName) {
+            try {
+                const response = await fetch(`/api/entries?agent=${agentName}&limit=5`);
+                const entries = await response.json();
+                
+                const entriesList = document.getElementById('entriesList');
+                entriesList.innerHTML = '';
+                
+                entries.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'entry-item';
+                    entryDiv.innerHTML = `
+                        <div class="entry-meta">
+                            ${entry.type} • ${new Date(entry.created_at).toLocaleDateString()} • ${entry.priority} priority
+                        </div>
+                        <div class="entry-content">${entry.content}</div>
+                    `;
+                    entriesList.appendChild(entryDiv);
+                });
+                
+                if (entries.length === 0) {
+                    entriesList.innerHTML = '<p style="color: #666; font-style: italic;">No entries yet for this agent.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading entries:', error);
+            }
+        }
+        
+        async function submitEntry() {
+            const content = document.getElementById('contentInput').value.trim();
+            if (!content) return;
+            
+            try {
+                const response = await fetch('/api/entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        type: 'auto' // Let the system auto-categorize
+                    })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('contentInput').value = '';
+                    loadEntries(currentAgent);
+                    
+                    // Show a brief success message
+                    const submitBtn = document.querySelector('.submit-btn');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Saved!';
+                    submitBtn.style.backgroundColor = '#28a745';
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.backgroundColor = '#007AFF';
+                    }, 2000);
+                } else {
+                    alert('Error saving entry. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting entry:', error);
+                alert('Error saving entry. Please try again.');
+            }
+        }
+        
+        // Load initial agent and entries
+        loadAgent(currentAgent);
+        
+        // Allow Enter+Cmd/Ctrl to submit
+        document.getElementById('contentInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                submitEntry();
+            }
+        });
+        
+        // Chat functions
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addChatMessage('You', message, 'user');
+            input.value = '';
+            
+            try {
+                const response = await fetch(`/api/agent/${currentAgent}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const result = await response.json();
+                addChatMessage(document.getElementById('chatAgentName').textContent, result.response, 'agent');
+                
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addChatMessage('System', 'Error communicating with agent. Please try again.', 'error');
+            }
+        }
+        
+        function addChatMessage(sender, message, type) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.marginBottom = '0.5rem';
+            messageDiv.style.padding = '0.5rem';
+            messageDiv.style.borderRadius = '3px';
+            
+            if (type === 'user') {
+                messageDiv.style.backgroundColor = '#007AFF';
+                messageDiv.style.color = 'white';
+                messageDiv.style.textAlign = 'right';
+            } else if (type === 'agent') {
+                messageDiv.style.backgroundColor = '#e9ecef';
+                messageDiv.style.color = '#333';
+            } else if (type === 'error') {
+                messageDiv.style.backgroundColor = '#ffebee';
+                messageDiv.style.color = '#c62828';
+            }
+            
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function clearChat() {
+            document.getElementById('chatMessages').innerHTML = '';
+        }
+        
+        // Allow Enter to send chat messages
+        document.getElementById('chatInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Voice recording functionality
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        
+        async function toggleRecording() {
+            const recordBtn = document.getElementById('recordBtn');
+            const statusSpan = document.getElementById('recordingStatus');
+            
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        // For now, just show a placeholder transcript
+                        const transcript = document.getElementById('voiceTranscript');
+                        transcript.value = '[Voice recording completed - transcript would appear here with speech-to-text integration]';
+                        
+                        // Add to main input
+                        const mainInput = document.getElementById('contentInput');
+                        if (mainInput.value) {
+                            mainInput.value += '\n\n' + transcript.value;
+                        } else {
+                            mainInput.value = transcript.value;
+                        }
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.textContent = '⏹️ Stop Recording';
+                    recordBtn.style.background = '#dc3545';
+                    statusSpan.textContent = 'Recording...';
+                } catch (err) {
+                    alert('Error accessing microphone: ' + err.message);
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                recordBtn.textContent = '🎤 Start Recording';
+                recordBtn.style.background = '#28a745';
+                statusSpan.textContent = 'Processing...';
+            }
+        }
+        
+        // Photo processing functionality
+        function processPhoto() {
+            const fileInput = document.getElementById('photoFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select an image file first.');
+                return;
+            }
+            
+            // Show preview
+            const preview = document.getElementById('photoPreview');
+            const img = document.getElementById('previewImg');
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+                
+                // For now, just add a placeholder text extraction result
+                const extractedText = '[Image processed - OCR text extraction would appear here with image processing integration]';
+                
+                // Add to main input
+                const mainInput = document.getElementById('contentInput');
+                if (mainInput.value) {
+                    mainInput.value += '\n\n' + extractedText;
+                } else {
+                    mainInput.value = extractedText;
+                }
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // File input change handler for photo preview
+        document.getElementById('photoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const preview = document.getElementById('photoPreview');
+                const img = document.getElementById('previewImg');
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // New functions for redesigned interface
+        function selectInputMethod(method) {
+            // Hide all input sections
+            document.querySelectorAll('#textInput, #voiceInput, #photoInput, #fileInput').forEach(div => {
+                div.classList.add('hidden');
+            });
+            
+            // Show selected input method
+            if (method === 'text') {
+                document.getElementById('textInput').classList.remove('hidden');
+            } else if (method === 'voice') {
+                document.getElementById('voiceInput').classList.remove('hidden');
+            } else if (method === 'photo') {
+                document.getElementById('photoInput').classList.remove('hidden');
+            } else if (method === 'file') {
+                // Add file input section if it doesn't exist
+                if (!document.getElementById('fileInput')) {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.id = 'fileInput';
+                    fileDiv.className = 'hidden';
+                    fileDiv.innerHTML = `
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <input type="file" id="fileUpload" accept=".pdf,.doc,.docx,.txt" style="margin-bottom: 0.5rem;">
+                            <button onclick="processFile()" style="padding: 0.5rem 1rem; background: #007AFF; color: white; border: none; border-radius: 3px; cursor: pointer;">📄 Process File</button>
+                            <div style="font-size: 0.9rem; color: #666;">Upload documents for processing. Content will be extracted and added to your input above.</div>
+                        </div>
+                    `;
+                    document.querySelector('.input-section').insertBefore(fileDiv, document.querySelector('.submit-btn'));
+                }
+                document.getElementById('fileInput').classList.remove('hidden');
+            }
+        }
+        
+        function processFile() {
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+            
+            // For now, just add a placeholder for file processing
+            const extractedText = `[File processed: ${file.name} - Content extraction would appear here with file processing integration]`;
+            
+            // Add to main input
+            const mainInput = document.getElementById('contentInput');
+            if (mainInput.value) {
+                mainInput.value += '\n\n' + extractedText;
+            } else {
+                mainInput.value = extractedText;
+            }
+        }
+        
+        async function submitQuickEntry() {
+            const quickInput = document.getElementById('quickInput');
+            const content = quickInput.value.trim();
+            
+            if (!content) return;
+            
+            try {
+                const response = await fetch('/api/entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        type: 'auto' // Let the system auto-categorize
+                    })
+                });
+                
+                if (response.ok) {
+                    quickInput.value = '';
+                    loadEntries(currentAgent);
+                    
+                    // Show success feedback
+                    const btn = document.querySelector('.quick-submit-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Added!';
+                    btn.style.background = '#28a745';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '#007AFF';
+                    }, 2000);
+                } else {
+                    alert('Error saving entry. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting quick entry:', error);
+                alert('Error saving entry. Please try again.');
+            }
+        }
+        
+        // Auto-resize quick input
+        document.getElementById('quickInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+        
+        // Allow Enter to submit quick entry (Shift+Enter for new line)
+        document.getElementById('quickInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitQuickEntry();
+            }
+        });
+    </script>
+</body>
+</html>
