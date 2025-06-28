@@ -16,6 +16,11 @@ const CampaignNewsIntelligence = require('./news-intelligence');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// Configure trust proxy for Render deployment
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Approved email addresses for campaign staff (invitation-only registration)
 const APPROVED_EMAILS = [
   'john@mcdairmant.com',

@@ -14,7 +14,10 @@ class CampaignDatabase {
   initialize() {
     const databaseUrl = process.env.DATABASE_URL || 'sqlite:./personal_ai.db';
     
-    if (databaseUrl.startsWith('postgresql://') || databaseUrl.startsWith('postgres://')) {
+    console.log('🔍 Database URL detected:', databaseUrl ? databaseUrl.replace(/:[^:@]*@/, ':***@') : 'undefined');
+    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+    
+    if (databaseUrl && (databaseUrl.startsWith('postgresql://') || databaseUrl.startsWith('postgres://'))) {
       this.initializePostgres(databaseUrl);
     } else {
       this.initializeSQLite(databaseUrl);
