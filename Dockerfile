@@ -16,11 +16,14 @@ COPY package*.json ./
 # Install dependencies (ignore optional failures)  
 RUN npm ci --only=production --ignore-optional
 
-# Copy application code
+# Copy application code (excluding node_modules)
 COPY . .
 
+# Remove any existing native binaries from local development
+RUN find node_modules -name "*.node" -delete 2>/dev/null || true
+
 # Rebuild native modules for target architecture
-RUN npm rebuild
+RUN npm rebuild bcrypt
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S campaign && \
