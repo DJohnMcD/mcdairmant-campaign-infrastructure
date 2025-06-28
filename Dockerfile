@@ -1,5 +1,5 @@
-# Campaign Infrastructure Docker Configuration
-FROM node:18-alpine
+# Campaign Infrastructure Docker Configuration  
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -10,8 +10,8 @@ RUN mkdir -p /app/uploads
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (ignore optional failures)  
+RUN npm ci --only=production --ignore-optional
 
 # Copy application code
 COPY . .

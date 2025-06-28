@@ -6,7 +6,10 @@
       "Bash(brew:*)",
       "Bash(mkdir:*)",
       "Bash(node:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(cp:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)"
     ],
     "deny": []
   }

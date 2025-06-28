@@ -51,7 +51,15 @@ class CampaignDatabase {
       console.log('✅ SQLite connection initialized');
     } catch (error) {
       console.error('❌ SQLite initialization failed:', error.message);
-      console.log('📦 Installing better-sqlite3 dependency...');
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🚨 Production environment detected - SQLite not available');
+        console.log('☁️ Falling back to PostgreSQL via DATABASE_URL...');
+        // Try to use PostgreSQL instead
+        const postgresUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/campaign';
+        this.initializePostgres(postgresUrl);
+        return;
+      }
+      console.log('📦 For local development, install: npm install better-sqlite3');
       throw new Error('SQLite connection failed. Run: npm install better-sqlite3');
     }
   }
