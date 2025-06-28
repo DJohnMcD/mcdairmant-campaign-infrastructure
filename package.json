@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "postinstall": "node -e \"if(process.env.NODE_ENV==='production'&&!process.env.DATABASE_URL.includes('postgres')){console.log('Warning: Production build without PostgreSQL')}\""
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.2",
