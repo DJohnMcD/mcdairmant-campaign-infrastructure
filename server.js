@@ -6,13 +6,70 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const MCPStructuredThinkingClient = require('./mcp-client');
 const PrivacyFilter = require('./privacy-filter');
 const { NY24_DISTRICT_DATA, MONITORING_TARGETS, NY24_HELPERS } = require('./ny24-district-data');
 const CampaignNewsIntelligence = require('./news-intelligence');
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
+
+// Approved email addresses for campaign staff (invitation-only registration)
+const APPROVED_EMAILS = [
+  'john@mcdairmant.com',
+  'campaign@mcdairmant.com',
+  'staff@mcdairmant.com',
+  'djohnmcd@gmail.com', // Add your actual email here
+  // Add team member emails here
+];
+
+// Security Configuration
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
+
+// Rate limiting for general API protection
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Strict rate limiting for authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login attempts per windowMs
+  message: {
+    error: 'Too many login attempts, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// File upload rate limiting
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit each IP to 10 uploads per hour
+  message: {
+    error: 'Too many file uploads, please try again later.',
+  },
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/auth/', authLimiter);
 
 // Initialize MCP client and privacy filter
 const mcpClient = new MCPStructuredThinkingClient();
@@ -362,6 +419,25 @@ db.serialize(() => {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
   )`);
+  
+  // Security audit logging table
+  db.run(`CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    action TEXT NOT NULL,
+    table_name TEXT,
+    record_id INTEGER,
+    ip_address TEXT,
+    user_agent TEXT,
+    details TEXT, -- JSON with additional context
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+  )`);
+  
+  // Add email column to users table if it doesn't exist
+  db.run(`ALTER TABLE users ADD COLUMN email TEXT`, (err) => {
+    // Ignore error if column already exists
+  });
 });
 
 // Middleware
@@ -419,16 +495,35 @@ app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
-app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+app.post('/register', authLimiter, async (req, res) => {
+  const { username, password, email } = req.body;
   
-  db.run('INSERT INTO users (username, password) VALUES (?, ?)', 
-    [username, hashedPassword], 
+  // Check if email is in approved list
+  if (!APPROVED_EMAILS.includes(email)) {
+    return res.status(403).json({ 
+      error: 'Registration by invitation only. Contact campaign administrator.' 
+    });
+  }
+  
+  // Additional security: minimum password requirements
+  if (password.length < 8) {
+    return res.status(400).json({ 
+      error: 'Password must be at least 8 characters long' 
+    });
+  }
+  
+  const hashedPassword = await bcrypt.hash(password, 12); // Increased rounds for security
+  
+  db.run('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)', 
+    [username, hashedPassword, email, new Date().toISOString()], 
     function(err) {
       if (err) {
         return res.status(400).json({ error: 'Username already exists' });
       }
+      
+      // Log successful registration
+      logAuditEvent(this.lastID, 'user_registered', 'users', this.lastID, req.ip);
+      
       req.session.userId = this.lastID;
       res.redirect('/dashboard');
     }
@@ -1228,7 +1323,12 @@ const upload = multer({
 // Banking and Expense Tracking API Endpoints
 
 // Bank statement upload and parsing
-app.post('/api/banking/upload-statement', requireAuth, upload.single('bankStatement'), (req, res) => {
+app.post('/api/banking/upload-statement', requireAuth, uploadLimiter, upload.single('bankStatement'), (req, res) => {
+  // Log file upload attempt
+  logAuditEvent(req.session.userId, 'file_upload', 'bank_transactions', null, req.ip, req.get('User-Agent'), {
+    filename: req.file?.originalname,
+    filesize: req.file?.size
+  });
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -1844,6 +1944,26 @@ function findAutoMatches(items) {
 function markAsReconciled(table, id) {
   const now = new Date().toISOString();
   db.run(`UPDATE ${table} SET reconciled = 1, reconciled_date = ? WHERE id = ?`, [now, id]);
+}
+
+// Security audit logging function
+function logAuditEvent(userId, action, tableName, recordId, ipAddress, userAgent = '', details = {}) {
+  db.run(`
+    INSERT INTO audit_log (user_id, action, table_name, record_id, ip_address, user_agent, details) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `, [
+    userId, 
+    action, 
+    tableName, 
+    recordId, 
+    ipAddress, 
+    userAgent, 
+    JSON.stringify(details)
+  ], (err) => {
+    if (err) {
+      console.error('Audit logging error:', err);
+    }
+  });
 }
 
 // FEC Compliance and Reporting API Endpoints
