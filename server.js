@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const Database = require('better-sqlite3');
+const CampaignDatabase = require('./database');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
@@ -77,372 +77,10 @@ const privacyFilter = new PrivacyFilter();
 const newsIntelligence = new CampaignNewsIntelligence();
 let mcpConnected = false;
 
-// Database setup
-const db = new Database('personal_ai.db');
+// Database setup with cloud compatibility
+const db = new CampaignDatabase();
 
-// Enable foreign keys for better-sqlite3
-db.pragma('foreign_keys = ON');
-
-// Initialize database tables (Personal AI + Campaign Infrastructure)
-// better-sqlite3 executes synchronously, no need for serialize()
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS entries (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    type TEXT, -- 'task', 'journal', 'note'
-    content TEXT,
-    tags TEXT,
-    priority TEXT,
-    status TEXT DEFAULT 'pending',
-    agent_assigned TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS agent_responses (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    entry_id INTEGER,
-    agent_name TEXT,
-    response TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (entry_id) REFERENCES entries (id)
-  )`);
-  
-  // Separate agent data stores
-  db.run(`CREATE TABLE IF NOT EXISTS terri_private (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    content TEXT,
-    session_notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS martin_data (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    task_summary TEXT,
-    strategic_notes TEXT,
-    priority_assessment TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS eggsy_data (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    creative_ideas TEXT,
-    connections_made TEXT,
-    suppressed_by_martin BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS ethel_data (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    legal_notes TEXT,
-    ethical_concerns TEXT,
-    audit_flags TEXT,
-    from_terri_flag BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  // Campaign-specific database tables
-  db.run(`CREATE TABLE IF NOT EXISTS campaign_donors (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT,
-    phone TEXT,
-    address TEXT,
-    city TEXT,
-    state TEXT,
-    zip TEXT,
-    employer TEXT,
-    occupation TEXT,
-    contribution_amount DECIMAL(10,2),
-    contribution_date DATE,
-    contribution_type TEXT, -- 'primary', 'general', 'other'
-    fec_reported BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS campaign_voters (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    voter_id TEXT, -- from voter file
-    first_name TEXT,
-    last_name TEXT,
-    address TEXT,
-    city TEXT,
-    zip TEXT,
-    phone TEXT,
-    email TEXT,
-    party_affiliation TEXT,
-    voting_history TEXT, -- JSON or comma-separated election years
-    contact_history TEXT, -- JSON of contact attempts
-    support_level INTEGER, -- 1-5 scale
-    volunteer_interest BOOLEAN DEFAULT 0,
-    county TEXT, -- NY-24 county
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS campaign_volunteers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT,
-    phone TEXT,
-    address TEXT,
-    city TEXT,
-    zip TEXT,
-    skills TEXT, -- JSON or comma-separated
-    availability TEXT, -- JSON of available times
-    hours_committed INTEGER DEFAULT 0,
-    hours_completed INTEGER DEFAULT 0,
-    background_check BOOLEAN DEFAULT 0,
-    active BOOLEAN DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS campaign_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    event_name TEXT NOT NULL,
-    event_type TEXT, -- 'fundraiser', 'townhall', 'rally', 'debate', 'other'
-    event_date DATE,
-    event_time TIME,
-    venue_name TEXT,
-    venue_address TEXT,
-    city TEXT,
-    county TEXT,
-    expected_attendance INTEGER,
-    actual_attendance INTEGER,
-    cost DECIMAL(10,2),
-    revenue DECIMAL(10,2),
-    notes TEXT,
-    status TEXT DEFAULT 'planned', -- 'planned', 'confirmed', 'completed', 'cancelled'
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS campaign_expenditures (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    vendor_name TEXT NOT NULL,
-    description TEXT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    expense_date DATE NOT NULL,
-    category TEXT, -- 'advertising', 'consulting', 'travel', 'office', 'fundraising', 'other'
-    payment_method TEXT,
-    fec_reported BOOLEAN DEFAULT 0,
-    receipt_path TEXT, -- file path to receipt
-    authorized_by TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS opposition_research (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    opponent_name TEXT DEFAULT 'Claudia Tenney',
-    research_category TEXT, -- 'voting_record', 'public_statements', 'fundraising', 'endorsements', 'other'
-    source_url TEXT,
-    source_date DATE,
-    content TEXT,
-    relevance_score INTEGER, -- 1-10
-    verified BOOLEAN DEFAULT 0,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  // Enhanced expense tracking and accounting tables
-  db.run(`CREATE TABLE IF NOT EXISTS campaign_expenses (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    vendor_name TEXT NOT NULL,
-    description TEXT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    expense_date DATE NOT NULL,
-    category TEXT, -- 'advertising', 'consulting', 'travel', 'office', 'fundraising', 'compliance', 'personal', 'art_project', 'other'
-    subcategory TEXT, -- more specific classification
-    classification TEXT DEFAULT 'pending', -- 'campaign', 'personal', 'mixed', 'pending'
-    classification_confidence DECIMAL(3,2), -- 0.00-1.00 confidence score
-    classification_reason TEXT, -- explanation for classification
-    payment_method TEXT,
-    payment_processor_id TEXT, -- Square transaction ID, etc.
-    bank_transaction_id INTEGER, -- link to bank_transactions table
-    fec_reportable BOOLEAN DEFAULT 0,
-    fec_reported BOOLEAN DEFAULT 0,
-    receipt_path TEXT,
-    receipt_ocr_text TEXT, -- OCR extracted text for searchability
-    authorized_by TEXT,
-    notes TEXT,
-    reconciled BOOLEAN DEFAULT 0,
-    reconciled_date DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (bank_transaction_id) REFERENCES bank_transactions (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS bank_transactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    account_name TEXT NOT NULL, -- 'campaign_checking', 'personal_checking', etc.
-    transaction_date DATE NOT NULL,
-    description TEXT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL, -- negative for debits, positive for credits
-    transaction_type TEXT, -- 'debit', 'credit', 'fee', 'interest', 'transfer'
-    reference_number TEXT,
-    balance_after DECIMAL(10,2),
-    reconciled BOOLEAN DEFAULT 0,
-    reconciled_with TEXT, -- 'expense', 'donation', 'cash_receipt', 'transfer'
-    reconciled_id INTEGER, -- ID of the reconciled record
-    reconciled_date DATETIME,
-    notes TEXT,
-    imported_from TEXT, -- 'csv_upload', 'api', 'manual'
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS cash_receipts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    receipt_date DATE NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    source TEXT NOT NULL, -- 'can_collection', 'event_donation', 'merchandise', 'other'
-    location TEXT, -- where the cash was collected
-    collector_name TEXT, -- who collected the cash
-    donor_info TEXT, -- any donor information if available
-    event_id INTEGER, -- link to campaign_events if applicable
-    receipt_photo_path TEXT, -- photo of physical receipt
-    deposited BOOLEAN DEFAULT 0,
-    deposit_date DATE,
-    bank_transaction_id INTEGER, -- link to deposit transaction
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (event_id) REFERENCES campaign_events (id),
-    FOREIGN KEY (bank_transaction_id) REFERENCES bank_transactions (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS payment_integrations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    processor_name TEXT NOT NULL, -- 'square', 'stripe', 'paypal', etc.
-    transaction_id TEXT NOT NULL,
-    transaction_date DATETIME NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    fee DECIMAL(10,2), -- processor fee
-    net_amount DECIMAL(10,2), -- amount after fees
-    transaction_type TEXT, -- 'donation', 'merchandise', 'event_ticket', 'other'
-    donor_info TEXT, -- JSON with donor information
-    qr_code_campaign TEXT, -- which QR code campaign generated this
-    voter_id TEXT, -- if voter information was captured
-    processed BOOLEAN DEFAULT 0,
-    donor_record_created BOOLEAN DEFAULT 0,
-    donor_record_id INTEGER,
-    bank_transaction_id INTEGER,
-    notes TEXT,
-    raw_data TEXT, -- JSON of raw processor response
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (donor_record_id) REFERENCES campaign_donors (id),
-    FOREIGN KEY (bank_transaction_id) REFERENCES bank_transactions (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS expense_classification_rules (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    rule_name TEXT NOT NULL,
-    rule_type TEXT NOT NULL, -- 'vendor_match', 'description_pattern', 'amount_range', 'category_match'
-    pattern TEXT NOT NULL, -- regex pattern or exact match string
-    classification TEXT NOT NULL, -- 'campaign', 'personal', 'mixed'
-    confidence DECIMAL(3,2) DEFAULT 0.90,
-    category TEXT, -- suggested category
-    subcategory TEXT, -- suggested subcategory
-    active BOOLEAN DEFAULT 1,
-    notes TEXT,
-    created_by TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS reconciliation_matches (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    match_type TEXT NOT NULL, -- 'exact', 'fuzzy', 'manual', 'split'
-    source_table TEXT NOT NULL, -- 'bank_transactions', 'payment_integrations', 'cash_receipts'
-    source_id INTEGER NOT NULL,
-    target_table TEXT NOT NULL, -- 'campaign_expenses', 'campaign_donors', 'cash_receipts'
-    target_id INTEGER NOT NULL,
-    match_confidence DECIMAL(3,2), -- 0.00-1.00
-    match_criteria TEXT, -- JSON of criteria used for matching
-    amount_difference DECIMAL(10,2), -- if amounts don't match exactly
-    reconciled_by TEXT, -- 'system' or username
-    reconciled_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  db.run(`CREATE TABLE IF NOT EXISTS social_media_posts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    platform TEXT NOT NULL, -- 'instagram', 'linkedin', 'youtube', 'facebook'
-    post_type TEXT, -- 'original', 'repost', 'cross_post'
-    content_text TEXT,
-    media_paths TEXT, -- JSON array of media file paths
-    hashtags TEXT, -- comma-separated hashtags
-    original_post_url TEXT, -- if this is a repost
-    campaign_relevance BOOLEAN DEFAULT 0,
-    moderation_status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected', 'flagged'
-    moderation_notes TEXT,
-    hate_speech_score DECIMAL(3,2), -- 0.00-1.00 from moderation AI
-    scheduled_date DATETIME,
-    posted_date DATETIME,
-    post_id TEXT, -- platform's post ID
-    engagement_stats TEXT, -- JSON of likes, shares, comments, etc.
-    ny24_relevance_score DECIMAL(3,2), -- relevance to NY-24 district
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  // Security audit logging table
-  db.run(`CREATE TABLE IF NOT EXISTS audit_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    action TEXT NOT NULL,
-    table_name TEXT,
-    record_id INTEGER,
-    ip_address TEXT,
-    user_agent TEXT,
-    details TEXT, -- JSON with additional context
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-  )`);
-  
-  // Add email column to users table if it doesn't exist
-  try {
-    db.exec(`ALTER TABLE users ADD COLUMN email TEXT`);
-  } catch (err) {
-    // Ignore error if column already exists
-  }
+// Database tables are automatically created by CampaignDatabase class during initialization
 
 // Middleware
 app.use(bodyParser.json());
@@ -482,7 +120,7 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
   try {
-    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+    const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
     
     if (user && await bcrypt.compare(password, user.password)) {
       req.session.userId = user.id;
@@ -520,11 +158,10 @@ app.post('/register', authLimiter, async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 12); // Increased rounds for security
   
   try {
-    const stmt = db.prepare('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)');
-    const result = stmt.run(username, hashedPassword, email, new Date().toISOString());
+    const result = await db.run('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)', [username, hashedPassword, email, new Date().toISOString()]);
     
     // Log successful registration
-    logAuditEvent(result.lastInsertRowid, 'user_registered', 'users', result.lastInsertRowid, req.ip);
+    await logAuditEvent(result.lastInsertRowid, 'user_registered', 'users', result.lastInsertRowid, req.ip);
     
     req.session.userId = result.lastInsertRowid;
     res.redirect('/dashboard');
@@ -548,23 +185,21 @@ app.get('/logout', (req, res) => {
 });
 
 // API Routes
-app.post('/api/entry', requireAuth, (req, res) => {
+app.post('/api/entry', requireAuth, async (req, res) => {
   const { content, type } = req.body;
   const processedEntry = processEntry(content, type);
   
-  db.run('INSERT INTO entries (user_id, type, content, tags, priority, agent_assigned) VALUES (?, ?, ?, ?, ?, ?)',
-    [req.session.userId, processedEntry.type, processedEntry.content, 
-     processedEntry.tags, processedEntry.priority, processedEntry.agent],
-    function(err) {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to save entry' });
-      }
-      res.json({ id: this.lastID, ...processedEntry });
-    }
-  );
+  try {
+    const result = await db.run('INSERT INTO entries (user_id, type, content, tags, priority, agent_assigned) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.session.userId, processedEntry.type, processedEntry.content, 
+       processedEntry.tags, processedEntry.priority, processedEntry.agent]);
+    res.json({ id: result.lastInsertRowid, ...processedEntry });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to save entry' });
+  }
 });
 
-app.get('/api/entries', requireAuth, (req, res) => {
+app.get('/api/entries', requireAuth, async (req, res) => {
   const { type, agent } = req.query;
   let query = 'SELECT * FROM entries WHERE user_id = ?';
   let params = [req.session.userId];
@@ -581,12 +216,12 @@ app.get('/api/entries', requireAuth, (req, res) => {
   
   query += ' ORDER BY created_at DESC';
   
-  db.all(query, params, (err, entries) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to fetch entries' });
-    }
+  try {
+    const entries = await db.query(query, params);
     res.json(entries);
-  });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to fetch entries' });
+  }
 });
 
 app.get('/api/agent/:agentName', requireAuth, (req, res) => {
@@ -604,26 +239,18 @@ app.post('/api/agent/:agentName/respond', requireAuth, async (req, res) => {
     const response = await generateAgentResponse(agentName, message, userId);
     
     // Store based on privacy rules
-    if (agentName === 'terri') {
-      // Terri conversations are private - store in terri_private table
-      db.run('INSERT INTO terri_private (user_id, content, session_notes) VALUES (?, ?, ?)',
-        [userId, message, response],
-        function(err) {
-          if (err) {
-            console.error('Error storing Terri private conversation:', err);
-          }
-        }
-      );
-    } else {
-      // Other agent conversations are shared
-      db.run('INSERT INTO agent_responses (entry_id, agent_name, response) VALUES (?, ?, ?)',
-        [null, agentName, response],
-        function(err) {
-          if (err) {
-            console.error('Error storing agent response:', err);
-          }
-        }
-      );
+    try {
+      if (agentName === 'terri') {
+        // Terri conversations are private - store in terri_private table
+        await db.run('INSERT INTO terri_private (user_id, content, session_notes) VALUES (?, ?, ?)',
+          [userId, message, response]);
+      } else {
+        // Other agent conversations are shared
+        await db.run('INSERT INTO agent_responses (entry_id, agent_name, response) VALUES (?, ?, ?)',
+          [null, agentName, response]);
+      }
+    } catch (err) {
+      console.error('Error storing agent conversation:', err);
     }
     
     res.json({ agent: agentName, response: response });
@@ -1234,39 +861,35 @@ app.post('/api/ny24/voter-priority', requireAuth, (req, res) => {
 });
 
 // Campaign Database API Endpoints
-app.get('/api/campaign/donors', requireAuth, (req, res) => {
+app.get('/api/campaign/donors', requireAuth, async (req, res) => {
   const userId = req.session.userId;
-  db.all(
-    'SELECT * FROM campaign_donors WHERE user_id = ? ORDER BY contribution_date DESC',
-    [userId],
-    (err, donors) => {
-      if (err) {
-        console.error('Error fetching donors:', err);
-        return res.status(500).json({ error: 'Failed to fetch donors' });
-      }
-      res.json(donors);
-    }
-  );
+  try {
+    const donors = await db.query(
+      'SELECT * FROM campaign_donors WHERE user_id = ? ORDER BY contribution_date DESC',
+      [userId]);
+    res.json(donors);
+  } catch (err) {
+    console.error('Error fetching donors:', err);
+    return res.status(500).json({ error: 'Failed to fetch donors' });
+  }
 });
 
-app.post('/api/campaign/donors', requireAuth, (req, res) => {
+app.post('/api/campaign/donors', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const donor = req.body;
   
-  db.run(
-    'INSERT INTO campaign_donors (user_id, first_name, last_name, email, phone, address, city, state, zip, employer, occupation, contribution_amount, contribution_date, contribution_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [userId, donor.first_name, donor.last_name, donor.email, donor.phone, donor.address, donor.city, donor.state, donor.zip, donor.employer, donor.occupation, donor.contribution_amount, donor.contribution_date, donor.contribution_type],
-    function(err) {
-      if (err) {
-        console.error('Error adding donor:', err);
-        return res.status(500).json({ error: 'Failed to add donor' });
-      }
-      res.json({ id: this.lastID, message: 'Donor added successfully' });
-    }
-  );
+  try {
+    const result = await db.run(
+      'INSERT INTO campaign_donors (user_id, first_name, last_name, email, phone, address, city, state, zip, employer, occupation, contribution_amount, contribution_date, contribution_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [userId, donor.first_name, donor.last_name, donor.email, donor.phone, donor.address, donor.city, donor.state, donor.zip, donor.employer, donor.occupation, donor.contribution_amount, donor.contribution_date, donor.contribution_type]);
+    res.json({ id: result.lastInsertRowid, message: 'Donor added successfully' });
+  } catch (err) {
+    console.error('Error adding donor:', err);
+    return res.status(500).json({ error: 'Failed to add donor' });
+  }
 });
 
-app.get('/api/campaign/voters', requireAuth, (req, res) => {
+app.get('/api/campaign/voters', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const { county, support_level } = req.query;
   
@@ -1285,28 +908,26 @@ app.get('/api/campaign/voters', requireAuth, (req, res) => {
   
   query += ' ORDER BY created_at DESC';
   
-  db.all(query, params, (err, voters) => {
-    if (err) {
-      console.error('Error fetching voters:', err);
-      return res.status(500).json({ error: 'Failed to fetch voters' });
-    }
+  try {
+    const voters = await db.query(query, params);
     res.json(voters);
-  });
+  } catch (err) {
+    console.error('Error fetching voters:', err);
+    return res.status(500).json({ error: 'Failed to fetch voters' });
+  }
 });
 
-app.get('/api/campaign/events', requireAuth, (req, res) => {
+app.get('/api/campaign/events', requireAuth, async (req, res) => {
   const userId = req.session.userId;
-  db.all(
-    'SELECT * FROM campaign_events WHERE user_id = ? ORDER BY event_date DESC',
-    [userId],
-    (err, events) => {
-      if (err) {
-        console.error('Error fetching events:', err);
-        return res.status(500).json({ error: 'Failed to fetch events' });
-      }
-      res.json(events);
-    }
-  );
+  try {
+    const events = await db.query(
+      'SELECT * FROM campaign_events WHERE user_id = ? ORDER BY event_date DESC',
+      [userId]);
+    res.json(events);
+  } catch (err) {
+    console.error('Error fetching events:', err);
+    return res.status(500).json({ error: 'Failed to fetch events' });
+  }
 });
 
 // Configure multer for file uploads
@@ -1327,9 +948,9 @@ const upload = multer({
 // Banking and Expense Tracking API Endpoints
 
 // Bank statement upload and parsing
-app.post('/api/banking/upload-statement', requireAuth, uploadLimiter, upload.single('bankStatement'), (req, res) => {
+app.post('/api/banking/upload-statement', requireAuth, uploadLimiter, upload.single('bankStatement'), async (req, res) => {
   // Log file upload attempt
-  logAuditEvent(req.session.userId, 'file_upload', 'bank_transactions', null, req.ip, req.get('User-Agent'), {
+  await logAuditEvent(req.session.userId, 'file_upload', 'bank_transactions', null, req.ip, req.get('User-Agent'), {
     filename: req.file?.originalname,
     filesize: req.file?.size
   });
@@ -1406,7 +1027,7 @@ app.post('/api/banking/upload-statement', requireAuth, uploadLimiter, upload.sin
 });
 
 // Get bank transactions
-app.get('/api/banking/transactions', requireAuth, (req, res) => {
+app.get('/api/banking/transactions', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const { account_name, reconciled, start_date, end_date } = req.query;
 
@@ -1435,48 +1056,48 @@ app.get('/api/banking/transactions', requireAuth, (req, res) => {
 
   query += ' ORDER BY transaction_date DESC';
 
-  db.all(query, params, (err, transactions) => {
-    if (err) {
-      console.error('Error fetching transactions:', err);
-      return res.status(500).json({ error: 'Failed to fetch transactions' });
-    }
+  try {
+    const transactions = await db.query(query, params);
     res.json(transactions);
-  });
+  } catch (err) {
+    console.error('Error fetching transactions:', err);
+    return res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
 });
 
 // Enhanced expense tracking
-app.post('/api/expenses', requireAuth, (req, res) => {
+app.post('/api/expenses', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const expense = req.body;
 
   // Apply automatic classification
   const classification = classifyExpense(expense);
 
-  db.run(`
-    INSERT INTO campaign_expenses 
-    (user_id, vendor_name, description, amount, expense_date, category, subcategory, 
-     classification, classification_confidence, classification_reason, payment_method, notes) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    userId, expense.vendor_name, expense.description, expense.amount, expense.expense_date,
-    expense.category || classification.category, expense.subcategory || classification.subcategory,
-    classification.classification, classification.confidence, classification.reason,
-    expense.payment_method, expense.notes
-  ], function(err) {
-    if (err) {
-      console.error('Error adding expense:', err);
-      return res.status(500).json({ error: 'Failed to add expense' });
-    }
+  try {
+    const result = await db.run(`
+      INSERT INTO campaign_expenses 
+      (user_id, vendor_name, description, amount, expense_date, category, subcategory, 
+       classification, classification_confidence, classification_reason, payment_method, notes) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      userId, expense.vendor_name, expense.description, expense.amount, expense.expense_date,
+      expense.category || classification.category, expense.subcategory || classification.subcategory,
+      classification.classification, classification.confidence, classification.reason,
+      expense.payment_method, expense.notes
+    ]);
     res.json({ 
-      id: this.lastID, 
+      id: result.lastInsertRowid, 
       message: 'Expense added successfully',
       classification: classification
     });
-  });
+  } catch (err) {
+    console.error('Error adding expense:', err);
+    return res.status(500).json({ error: 'Failed to add expense' });
+  }
 });
 
 // Get expenses with filtering
-app.get('/api/expenses', requireAuth, (req, res) => {
+app.get('/api/expenses', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const { classification, category, reconciled, start_date, end_date } = req.query;
 
@@ -1510,38 +1131,38 @@ app.get('/api/expenses', requireAuth, (req, res) => {
 
   query += ' ORDER BY expense_date DESC';
 
-  db.all(query, params, (err, expenses) => {
-    if (err) {
-      console.error('Error fetching expenses:', err);
-      return res.status(500).json({ error: 'Failed to fetch expenses' });
-    }
+  try {
+    const expenses = await db.query(query, params);
     res.json(expenses);
-  });
+  } catch (err) {
+    console.error('Error fetching expenses:', err);
+    return res.status(500).json({ error: 'Failed to fetch expenses' });
+  }
 });
 
 // Cash receipt tracking
-app.post('/api/receipts/cash', requireAuth, (req, res) => {
+app.post('/api/receipts/cash', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const receipt = req.body;
 
-  db.run(`
-    INSERT INTO cash_receipts 
-    (user_id, receipt_date, amount, source, location, collector_name, donor_info, notes) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    userId, receipt.receipt_date, receipt.amount, receipt.source,
-    receipt.location, receipt.collector_name, receipt.donor_info, receipt.notes
-  ], function(err) {
-    if (err) {
-      console.error('Error adding cash receipt:', err);
-      return res.status(500).json({ error: 'Failed to add cash receipt' });
-    }
-    res.json({ id: this.lastID, message: 'Cash receipt recorded successfully' });
-  });
+  try {
+    const result = await db.run(`
+      INSERT INTO cash_receipts 
+      (user_id, receipt_date, amount, source, location, collector_name, donor_info, notes) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      userId, receipt.receipt_date, receipt.amount, receipt.source,
+      receipt.location, receipt.collector_name, receipt.donor_info, receipt.notes
+    ]);
+    res.json({ id: result.lastInsertRowid, message: 'Cash receipt recorded successfully' });
+  } catch (err) {
+    console.error('Error adding cash receipt:', err);
+    return res.status(500).json({ error: 'Failed to add cash receipt' });
+  }
 });
 
 // Get cash receipts
-app.get('/api/receipts/cash', requireAuth, (req, res) => {
+app.get('/api/receipts/cash', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   const { deposited, start_date, end_date } = req.query;
 
@@ -1565,13 +1186,13 @@ app.get('/api/receipts/cash', requireAuth, (req, res) => {
 
   query += ' ORDER BY receipt_date DESC';
 
-  db.all(query, params, (err, receipts) => {
-    if (err) {
-      console.error('Error fetching cash receipts:', err);
-      return res.status(500).json({ error: 'Failed to fetch cash receipts' });
-    }
+  try {
+    const receipts = await db.query(query, params);
     res.json(receipts);
-  });
+  } catch (err) {
+    console.error('Error fetching cash receipts:', err);
+    return res.status(500).json({ error: 'Failed to fetch cash receipts' });
+  }
 });
 
 // Square Payment Integration endpoints
@@ -1945,29 +1566,29 @@ function findAutoMatches(items) {
   return matches;
 }
 
-function markAsReconciled(table, id) {
+async function markAsReconciled(table, id) {
   const now = new Date().toISOString();
-  db.run(`UPDATE ${table} SET reconciled = 1, reconciled_date = ? WHERE id = ?`, [now, id]);
+  await db.run(`UPDATE ${table} SET reconciled = 1, reconciled_date = ? WHERE id = ?`, [now, id]);
 }
 
 // Security audit logging function
-function logAuditEvent(userId, action, tableName, recordId, ipAddress, userAgent = '', details = {}) {
-  db.run(`
-    INSERT INTO audit_log (user_id, action, table_name, record_id, ip_address, user_agent, details) 
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `, [
-    userId, 
-    action, 
-    tableName, 
-    recordId, 
-    ipAddress, 
-    userAgent, 
-    JSON.stringify(details)
-  ], (err) => {
-    if (err) {
-      console.error('Audit logging error:', err);
-    }
-  });
+async function logAuditEvent(userId, action, tableName, recordId, ipAddress, userAgent = '', details = {}) {
+  try {
+    await db.run(`
+      INSERT INTO audit_log (user_id, action, table_name, record_id, ip_address, user_agent, details) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      userId, 
+      action, 
+      tableName, 
+      recordId, 
+      ipAddress, 
+      userAgent, 
+      JSON.stringify(details)
+    ]);
+  } catch (err) {
+    console.error('Audit logging error:', err);
+  }
 }
 
 // FEC Compliance and Reporting API Endpoints
@@ -2285,7 +1906,7 @@ function generateDonorCSVReport(donors) {
 }
 
 // Health Check API (for deployment monitoring)
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
   const health = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -2297,14 +1918,14 @@ app.get('/health', (req, res) => {
   };
 
   // Test database connection
-  db.get('SELECT 1', (err) => {
-    if (err) {
-      health.database = 'error';
-      health.status = 'unhealthy';
-    }
-    
-    res.status(health.status === 'healthy' ? 200 : 503).json(health);
-  });
+  try {
+    await db.get('SELECT 1');
+  } catch (err) {
+    health.database = 'error';
+    health.status = 'unhealthy';
+  }
+  
+  res.status(health.status === 'healthy' ? 200 : 503).json(health);
 });
 
 // Campaign Dashboard Route
@@ -2491,38 +2112,29 @@ function analyzeSentiment(articles) {
 }
 
 // Terri Chat API
-app.post('/api/terri/chat', requireAuth, (req, res) => {
+app.post('/api/terri/chat', requireAuth, async (req, res) => {
   const { message } = req.body;
   const userId = req.session.userId;
   
-  // Store the user message in Terri's private table
-  db.run(
-    'INSERT INTO terri_private (user_id, content, session_notes, created_at) VALUES (?, ?, ?, ?)',
-    [userId, message, 'User chat message', new Date().toISOString()],
-    function(err) {
-      if (err) {
-        console.error('Error storing private message:', err);
-        return res.status(500).json({ error: 'Failed to store message' });
-      }
-      
-      // Generate Terri's response based on content
-      let response = generateTerriResponse(message);
-      
-      // Store Terri's response
-      db.run(
-        'INSERT INTO terri_private (user_id, content, session_notes, created_at) VALUES (?, ?, ?, ?)',
-        [userId, response, 'Terri chat response', new Date().toISOString()],
-        function(err) {
-          if (err) {
-            console.error('Error storing Terri response:', err);
-            return res.status(500).json({ error: 'Failed to store response' });
-          }
-          
-          res.json({ response: response });
-        }
-      );
-    }
-  );
+  try {
+    // Store the user message in Terri's private table
+    await db.run(
+      'INSERT INTO terri_private (user_id, content, session_notes, created_at) VALUES (?, ?, ?, ?)',
+      [userId, message, 'User chat message', new Date().toISOString()]);
+    
+    // Generate Terri's response based on content
+    let response = generateTerriResponse(message);
+    
+    // Store Terri's response
+    await db.run(
+      'INSERT INTO terri_private (user_id, content, session_notes, created_at) VALUES (?, ?, ?, ?)',
+      [userId, response, 'Terri chat response', new Date().toISOString()]);
+    
+    res.json({ response: response });
+  } catch (err) {
+    console.error('Error in Terri chat:', err);
+    return res.status(500).json({ error: 'Failed to process chat message' });
+  }
 });
 
 function generateTerriResponse(message) {

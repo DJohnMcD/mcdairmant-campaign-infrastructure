@@ -8,10 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Start server**: `npm start` or `node server.js` - Runs the campaign infrastructure web server on port 8080
 - **Development**: `npm run dev` - Runs server with nodemon for auto-restart on changes (requires nodemon install)
-- **Install dependencies**: `npm install` - Install all required dependencies including MCP packages
+- **Install dependencies**: `npm install` - Install all required dependencies including MCP packages and pg
 - **Test MCP integration**: `node test-mcp.js` - Verify MCP server connections and agent functionality
 - **Test expense classification**: `node test-expense-classification.js` - Test expense categorization and CSV parsing
-- **Database file**: `personal_ai.db` - SQLite database created automatically on first run with campaign tables
+- **Database**: Auto-detected from DATABASE_URL (SQLite local, PostgreSQL cloud)
 - **Stop all processes**: `pkill -f "node server.js"` - Kill any running server instances
 - **Check syntax**: `node -c server.js` - Validate server.js syntax without running
 
