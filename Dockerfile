@@ -1,6 +1,9 @@
 # Campaign Infrastructure Docker Configuration  
 FROM node:20-alpine
 
+# Install build tools for native module compilation
+RUN apk add --no-cache python3 make g++
+
 # Set working directory
 WORKDIR /app
 
@@ -15,6 +18,9 @@ RUN npm ci --only=production --ignore-optional
 
 # Copy application code
 COPY . .
+
+# Rebuild native modules for target architecture
+RUN npm rebuild
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S campaign && \
