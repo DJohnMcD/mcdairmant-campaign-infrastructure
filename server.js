@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
@@ -78,10 +78,13 @@ const newsIntelligence = new CampaignNewsIntelligence();
 let mcpConnected = false;
 
 // Database setup
-const db = new sqlite3.Database('personal_ai.db');
+const db = new Database('personal_ai.db');
+
+// Enable foreign keys for better-sqlite3
+db.pragma('foreign_keys = ON');
 
 // Initialize database tables (Personal AI + Campaign Infrastructure)
-db.serialize(() => {
+// better-sqlite3 executes synchronously, no need for serialize()
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
@@ -435,10 +438,11 @@ db.serialize(() => {
   )`);
   
   // Add email column to users table if it doesn't exist
-  db.run(`ALTER TABLE users ADD COLUMN email TEXT`, (err) => {
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN email TEXT`);
+  } catch (err) {
     // Ignore error if column already exists
-  });
-});
+  }
 
 // Middleware
 app.use(bodyParser.json());
@@ -477,10 +481,8 @@ app.get('/login', (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   
-  db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database error' });
-    }
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
     
     if (user && await bcrypt.compare(password, user.password)) {
       req.session.userId = user.id;
@@ -488,7 +490,10 @@ app.post('/login', async (req, res) => {
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
     }
-  });
+  } catch (err) {
+    console.error('Database error:', err);
+    return res.status(500).json({ error: 'Database error' });
+  }
 });
 
 app.get('/register', (req, res) => {
@@ -514,20 +519,19 @@ app.post('/register', authLimiter, async (req, res) => {
   
   const hashedPassword = await bcrypt.hash(password, 12); // Increased rounds for security
   
-  db.run('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)', 
-    [username, hashedPassword, email, new Date().toISOString()], 
-    function(err) {
-      if (err) {
-        return res.status(400).json({ error: 'Username already exists' });
-      }
-      
-      // Log successful registration
-      logAuditEvent(this.lastID, 'user_registered', 'users', this.lastID, req.ip);
-      
-      req.session.userId = this.lastID;
-      res.redirect('/dashboard');
-    }
-  );
+  try {
+    const stmt = db.prepare('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)');
+    const result = stmt.run(username, hashedPassword, email, new Date().toISOString());
+    
+    // Log successful registration
+    logAuditEvent(result.lastInsertRowid, 'user_registered', 'users', result.lastInsertRowid, req.ip);
+    
+    req.session.userId = result.lastInsertRowid;
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error('Registration error:', err);
+    return res.status(400).json({ error: 'Username already exists' });
+  }
 });
 
 app.get('/dashboard', requireAuth, (req, res) => {
