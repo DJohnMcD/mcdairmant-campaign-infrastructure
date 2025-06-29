@@ -223,3 +223,29 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 - Implement email/SMS delivery system for daily campaign intelligence briefs
 
 These priorities transform the system from local development to live campaign operations center.
+
+## Mobile Access & Remote Operations
+
+**Claude Mobile App Integration:**
+- GitHub repository: `https://github.com/DJohnMcD/mcdairmant-campaign-infrastructure`
+- Mobile API endpoints available at `/api/mobile/*` for quick campaign operations
+- Built-in handwriting OCR in Claude mobile app sufficient for note capture
+- Repository access provides code context for development requests
+
+**Mobile-Optimized Endpoints:**
+- `GET /api/mobile/status` - Server status and user info
+- `GET /api/mobile/repo-info` - GitHub repository information for Claude access
+- `POST /api/mobile/quick-expense` - Fast expense entry for field operations
+- `POST /api/mobile/agent-chat` - Quick agent interactions with `quick_mode=true`
+
+**Remote Development Workflow:**
+1. Use Claude mobile app with repository access to view/understand code
+2. Capture handwritten notes with built-in OCR for campaign planning
+3. Request code changes and deployments through mobile Claude interface
+4. Monitor campaign operations through mobile API endpoints
+5. Test and deploy changes via GitHub Actions CI/CD pipeline
+
+**Handwriting Integration:**
+- Claude mobile app's built-in OCR handles handwritten campaign notes effectively
+- Notes can be processed into campaign tasks, strategies, or compliance items
+- Mobile endpoints support quick categorization and agent routing

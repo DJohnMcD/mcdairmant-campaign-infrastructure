@@ -1,78 +1,71 @@
-2025-06-28T22:12:29.567340681Z       address: '::1',
-2025-06-28T22:12:29.567342951Z       port: 5432
-2025-06-28T22:12:29.567344932Z     },
-2025-06-28T22:12:29.567346992Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2025-06-28T22:12:29.567349092Z         at createConnectionError (node:net:1652:14)
-2025-06-28T22:12:29.567351082Z         at afterConnectMultiple (node:net:1682:16) {
-2025-06-28T22:12:29.567353122Z       errno: -111,
-2025-06-28T22:12:29.567355522Z       code: 'ECONNREFUSED',
-2025-06-28T22:12:29.567357952Z       syscall: 'connect',
-2025-06-28T22:12:29.567360622Z       address: '127.0.0.1',
-2025-06-28T22:12:29.567362952Z       port: 5432
-2025-06-28T22:12:29.567365492Z     }
-2025-06-28T22:12:29.567368362Z   ]
-2025-06-28T22:12:29.567371212Z }
-2025-06-28T22:12:29.567782895Z AggregateError [ECONNREFUSED]: 
-2025-06-28T22:12:29.567793855Z     at /app/node_modules/pg-pool/index.js:45:11
-2025-06-28T22:12:29.567797255Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
-2025-06-28T22:12:29.567800235Z   code: 'ECONNREFUSED',
-2025-06-28T22:12:29.567803235Z   [errors]: [
-2025-06-28T22:12:29.567806496Z     Error: connect ECONNREFUSED ::1:5432
-2025-06-28T22:12:29.567809476Z         at createConnectionError (node:net:1652:14)
-2025-06-28T22:12:29.567812506Z         at afterConnectMultiple (node:net:1682:16) {
-2025-06-28T22:12:29.567815066Z       errno: -111,
-2025-06-28T22:12:29.567817716Z       code: 'ECONNREFUSED',
-2025-06-28T22:12:29.567820286Z       syscall: 'connect',
-2025-06-28T22:12:29.567823206Z       address: '::1',
-2025-06-28T22:12:29.567826166Z       port: 5432
-2025-06-28T22:12:29.567828426Z     },
-2025-06-28T22:12:29.567831116Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2025-06-28T22:12:29.567834176Z         at createConnectionError (node:net:1652:14)
-2025-06-28T22:12:29.567836867Z         at afterConnectMultiple (node:net:1682:16) {
-2025-06-28T22:12:29.567839467Z       errno: -111,
-2025-06-28T22:12:29.567842117Z       code: 'ECONNREFUSED',
-2025-06-28T22:12:29.567844707Z       syscall: 'connect',
-2025-06-28T22:12:29.567847477Z       address: '127.0.0.1',
-2025-06-28T22:12:29.567850217Z       port: 5432
-2025-06-28T22:12:29.567853447Z     }
-2025-06-28T22:12:29.567856267Z   ]
-2025-06-28T22:12:29.567858797Z }
-2025-06-28T22:12:34.468669018Z Sequential Thinking MCP Server running on stdio
-2025-06-28T22:12:34.565603326Z Connected to MCP structured thinking server
-2025-06-28T22:12:34.565629427Z ✓ MCP structured thinking server connected successfully
-2025-06-28T22:12:34.568247557Z ✓ Available MCP tools: sequentialthinking
-2025-06-28T22:12:35.352199725Z ==> Your service is live 🎉
-2025-06-28T22:12:35.430856295Z ==> 
-2025-06-28T22:12:35.508822594Z ==> ///////////////////////////////////////////////////////////
-2025-06-28T22:12:35.582539124Z ==> 
-2025-06-28T22:12:35.653842485Z ==> Available at your primary URL https://mcdairmant-campaign-infrastructure.onrender.com
-2025-06-28T22:12:35.728889395Z ==> 
-2025-06-28T22:12:35.803228265Z ==> ///////////////////////////////////////////////////////////
-2025-06-28T22:13:55.788566882Z Database error: AggregateError [ECONNREFUSED]: 
-2025-06-28T22:13:55.788598303Z     at /app/node_modules/pg-pool/index.js:45:11
-2025-06-28T22:13:55.788603103Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2025-06-28T22:13:55.788607434Z     at async CampaignDatabase.query (/app/database.js:72:22)
-2025-06-28T22:13:55.788611064Z     at async CampaignDatabase.get (/app/database.js:93:22)
-2025-06-28T22:13:55.788614814Z     at async /app/server.js:128:18 {
-2025-06-28T22:13:55.788631464Z   code: 'ECONNREFUSED',
-2025-06-28T22:13:55.788633804Z   [errors]: [
-2025-06-28T22:13:55.788636424Z     Error: connect ECONNREFUSED ::1:5432
-2025-06-28T22:13:55.788639244Z         at createConnectionError (node:net:1652:14)
-2025-06-28T22:13:55.788641785Z         at afterConnectMultiple (node:net:1682:16) {
-2025-06-28T22:13:55.788644265Z       errno: -111,
-2025-06-28T22:13:55.788647835Z       code: 'ECONNREFUSED',
-2025-06-28T22:13:55.788654195Z       syscall: 'connect',
-2025-06-28T22:13:55.788656845Z       address: '::1',
-2025-06-28T22:13:55.788659415Z       port: 5432
-2025-06-28T22:13:55.788662095Z     },
-2025-06-28T22:13:55.788664775Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2025-06-28T22:13:55.788667815Z         at createConnectionError (node:net:1652:14)
-2025-06-28T22:13:55.788670685Z         at afterConnectMultiple (node:net:1682:16) {
-2025-06-28T22:13:55.788673445Z       errno: -111,
-2025-06-28T22:13:55.788676196Z       code: 'ECONNREFUSED',
-2025-06-28T22:13:55.788678976Z       syscall: 'connect',
-2025-06-28T22:13:55.788681146Z       address: '127.0.0.1',
-2025-06-28T22:13:55.788683326Z       port: 5432
-2025-06-28T22:13:55.788685536Z     }
-2025-06-28T22:13:55.788688146Z   ]
-2025-06-28T22:13:55.788702257Z }
+2025-06-29T18:42:15.48489038Z #17 extracting sha256:f2bef23b8088ccd472cd9933264dd9319225c1c4ca17aa293ef949cfa59a270d 3.0s done
+2025-06-29T18:42:15.646476729Z #17 CACHED
+2025-06-29T18:42:15.64650333Z 
+2025-06-29T18:42:15.64651738Z #18 exporting to docker image format
+2025-06-29T18:42:15.64652428Z #18 exporting layers done
+2025-06-29T18:42:15.646530181Z #18 exporting manifest sha256:7ba141bbcce907d6f9934a0b11bd50f785bead012bdc80f4b53299423297a385 done
+2025-06-29T18:42:15.64653595Z #18 exporting config sha256:197b2f08285ba1224397826b7a79c00e3cca86c8898a016c43fbfa9a5105dfae done
+2025-06-29T18:42:17.565799903Z #18 DONE 1.9s
+2025-06-29T18:42:17.565816753Z 
+2025-06-29T18:42:17.565821124Z #19 exporting cache to client directory
+2025-06-29T18:42:17.565824264Z #19 preparing build cache for export
+2025-06-29T18:42:17.618966795Z #19 writing cache manifest sha256:209e55ca706ce1629ebdaa17ed26c8352fa057ab5978a44b87dd6041f03f156d done
+2025-06-29T18:42:17.618980355Z #19 DONE 0.1s
+2025-06-29T18:42:18.749405154Z Pushing image to registry...
+2025-06-29T18:42:19.481038717Z Upload succeeded
+2025-06-29T18:42:22.072886051Z ==> Deploying...
+2025-06-29T18:42:34.904883291Z > personal-ai-assistant@1.0.0 start
+2025-06-29T18:42:34.904887742Z > node server.js
+2025-06-29T18:42:34.904890102Z 
+2025-06-29T18:42:37.406493119Z 🔍 Database URL detected: postgresql://campaign_user:***@dpg-d1g6avjipnbc73acf5tg-a.ohio-postgres.render.com/campaign_infrastructure
+2025-06-29T18:42:37.406846578Z 🔍 NODE_ENV: production
+2025-06-29T18:42:37.40693665Z 🐘 Initializing PostgreSQL connection for cloud deployment...
+2025-06-29T18:42:37.81027062Z ✅ PostgreSQL connection initialized
+2025-06-29T18:42:37.810441454Z 🗂️ Creating campaign database tables...
+2025-06-29T18:42:37.910166891Z ✅ Database tables initialized
+2025-06-29T18:42:38.004006707Z Warning: connect.session() MemoryStore is not
+2025-06-29T18:42:38.004028057Z designed for a production environment, as it will leak
+2025-06-29T18:42:38.004030417Z memory, and will not scale past a single process.
+2025-06-29T18:42:38.009643891Z Personal AI Assistant running on http://localhost:10000
+2025-06-29T18:42:38.009785974Z Dashboard: http://localhost:10000/dashboard
+2025-06-29T18:42:38.009856526Z Terri Chat: http://localhost:10000/terri
+2025-06-29T18:42:38.010006159Z Attempting to connect to MCP structured thinking server...
+2025-06-29T18:42:43.023707235Z ==> Your service is live 🎉
+2025-06-29T18:42:43.097972235Z ==> 
+2025-06-29T18:42:43.166269916Z ==> ///////////////////////////////////////////////////////////
+2025-06-29T18:42:43.235538267Z ==> 
+2025-06-29T18:42:43.304157758Z ==> Available at your primary URL https://mcdairmant-campaign-infrastructure.onrender.com
+2025-06-29T18:42:43.373643448Z ==> 
+2025-06-29T18:42:43.442759599Z ==> ///////////////////////////////////////////////////////////
+2025-06-29T18:42:44.602341157Z Sequential Thinking MCP Server running on stdio
+2025-06-29T18:42:44.699157794Z Connected to MCP structured thinking server
+2025-06-29T18:42:44.699244776Z ✓ MCP structured thinking server connected successfully
+2025-06-29T18:42:44.70275511Z ✓ Available MCP tools: sequentialthinking
+2025-06-29T18:47:47.694951117Z ==> Detected service running on port 10000
+2025-06-29T18:47:47.885299206Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-06-29T18:58:45.162096245Z npm error path /app
+2025-06-29T18:58:45.162135546Z npm error command failed
+2025-06-29T18:58:45.162532005Z npm error signal SIGTERM
+2025-06-29T18:58:45.162664998Z npm error command sh -c node server.js
+2025-06-29T18:58:45.165330932Z npm error A complete log of this run can be found in: /home/campaign/.npm/_logs/2025-06-29T18_42_34_300Z-debug-0.log
+2025-06-29T19:01:00.190099881Z 
+2025-06-29T19:01:00.190130362Z > personal-ai-assistant@1.0.0 start
+2025-06-29T19:01:00.190134812Z > node server.js
+2025-06-29T19:01:00.190137552Z 
+2025-06-29T19:01:02.689077821Z 🔍 Database URL detected: postgresql://campaign_user:***@dpg-d1g6avjipnbc73acf5tg-a.ohio-postgres.render.com/campaign_infrastructure
+2025-06-29T19:01:02.689576835Z 🔍 NODE_ENV: production
+2025-06-29T19:01:02.689652867Z 🐘 Initializing PostgreSQL connection for cloud deployment...
+2025-06-29T19:01:03.193883573Z ✅ PostgreSQL connection initialized
+2025-06-29T19:01:03.193995967Z 🗂️ Creating campaign database tables...
+2025-06-29T19:01:03.290937434Z ✅ Database tables initialized
+2025-06-29T19:01:03.387970644Z Warning: connect.session() MemoryStore is not
+2025-06-29T19:01:03.388001895Z designed for a production environment, as it will leak
+2025-06-29T19:01:03.388004975Z memory, and will not scale past a single process.
+2025-06-29T19:01:03.396176421Z Personal AI Assistant running on http://localhost:10000
+2025-06-29T19:01:03.396209002Z Dashboard: http://localhost:10000/dashboard
+2025-06-29T19:01:03.396212042Z Terri Chat: http://localhost:10000/terri
+2025-06-29T19:01:03.396214742Z Attempting to connect to MCP structured thinking server...
+2025-06-29T19:01:10.495145887Z Sequential Thinking MCP Server running on stdio
+2025-06-29T19:01:10.594301236Z Connected to MCP structured thinking server
+2025-06-29T19:01:10.594353607Z ✓ MCP structured thinking server connected successfully
+2025-06-29T19:01:10.597461333Z ✓ Available MCP tools: sequentialthinking

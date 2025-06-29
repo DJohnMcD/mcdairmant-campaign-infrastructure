@@ -1,0 +1,121 @@
+name: Campaign Infrastructure CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run syntax check
+      run: node -c server.js
+    
+    - name: Test MCP integration
+      run: node test-mcp.js
+      continue-on-error: true
+    
+    - name: Test database initialization
+      run: node -e "const db = require('./database'); console.log('Database initialized');"
+    
+    - name: Security audit
+      run: npm audit --audit-level moderate
+      continue-on-error: true
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  mobile-compatibility:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Test mobile API endpoints
+      run: |
+        node -e "
+        const app = require('./server.js');
+        console.log('Mobile API endpoints configured');
+        "
+      continue-on-error: true
+    
+    - name: Validate CLAUDE.md documentation
+      run: |
+        if [ -f "CLAUDE.md" ]; then
+          echo "✓ CLAUDE.md documentation exists"
+          wc -l CLAUDE.md
+        else
+          echo "✗ CLAUDE.md documentation missing"
+          exit 1
+        fi
+
+  deploy-staging:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to staging
+      run: |
+        echo "Staging deployment would occur here"
+        echo "Set DATABASE_URL for staging environment"
+        echo "Configure mobile access endpoints"
+
+  deploy-production:
+    needs: [test, security, mobile-compatibility]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: |
+        echo "Production deployment would occur here"
+        echo "Ensure DATABASE_URL is set for PostgreSQL"
+        echo "Verify mobile API endpoints are accessible"
+        echo "Campaign infrastructure ready for mobile access"

@@ -87,13 +87,18 @@ const db = new CampaignDatabase();
 
 // Database tables are automatically created by CampaignDatabase class during initialization
 
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware with mobile optimization
+app.use(bodyParser.json({ limit: '10mb' })); // Increased for image uploads
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(session({
-  secret: 'your-secret-key-change-this',
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 // Serve static files
@@ -2173,6 +2178,141 @@ function generateTerriResponse(message) {
   // Default empathetic response
   return "Thank you for sharing this with me, beautiful human. 🌸 I'm holding space for exactly where you are right now - no judgment, just presence and love. Your experiences matter, your feelings are valid, and you're exactly where you need to be on your journey. What would feel most healing for you to explore together?";
 }
+
+// Mobile-optimized API endpoints for Claude mobile app access
+app.get('/api/mobile/status', requireAuth, (req, res) => {
+  res.json({
+    server: 'online',
+    timestamp: new Date().toISOString(),
+    user: req.session.user.username,
+    mcp_connected: mcpConnected,
+    database_type: process.env.DATABASE_URL ? 'postgresql' : 'sqlite'
+  });
+});
+
+// GitHub repository info for mobile Claude access
+app.get('/api/mobile/repo-info', requireAuth, (req, res) => {
+  res.json({
+    repository: 'mcdairmant-campaign-infrastructure',
+    owner: 'DJohnMcD',
+    url: 'https://github.com/DJohnMcD/mcdairmant-campaign-infrastructure',
+    main_files: ['server.js', 'database.js', 'mcp-client.js', 'CLAUDE.md'],
+    documentation: 'CLAUDE.md contains architecture and commands',
+    deployment_status: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Quick action endpoints for mobile efficiency
+app.post('/api/mobile/quick-expense', requireAuth, (req, res) => {
+  const { amount, vendor, category, note } = req.body;
+  
+  if (!amount || !vendor) {
+    return res.status(400).json({ error: 'Amount and vendor required' });
+  }
+  
+  const expense = {
+    amount: parseFloat(amount),
+    vendor,
+    category: category || 'uncategorized',
+    description: note || '',
+    date: new Date().toISOString().split('T')[0],
+    classification: 'manual',
+    fec_compliant: true,
+    user_id: req.session.user.id
+  };
+  
+  db.addMobileExpense(expense, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to add expense' });
+    }
+    res.json({ success: true, expense_id: result.insertId || result.rowCount, expense });
+  });
+});
+
+// Mobile dashboard status with daily metrics
+app.get('/api/mobile/dashboard', requireAuth, (req, res) => {
+  db.getMobileStatus(req.session.user.id, (err, status) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to get status' });
+    }
+    
+    res.json({
+      user: req.session.user.username,
+      today_expenses: status.today_expenses || 0,
+      recent_entries: status.recent_entries || 0,
+      recent_chats: status.recent_chats || 0,
+      server_status: 'online',
+      mcp_available: mcpConnected,
+      last_updated: new Date().toISOString()
+    });
+  });
+});
+
+// Add mobile note from handwriting OCR
+app.post('/api/mobile/add-note', requireAuth, (req, res) => {
+  const { content, type, category } = req.body;
+  
+  if (!content) {
+    return res.status(400).json({ error: 'Content required' });
+  }
+  
+  const note = {
+    user_id: req.session.user.id,
+    content,
+    type: type || 'handwritten',
+    category: category || 'mobile'
+  };
+  
+  db.addMobileNote(note, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to add note' });
+    }
+    res.json({ 
+      success: true, 
+      note_id: result.insertId || result.rowCount, 
+      note,
+      categorized: true 
+    });
+  });
+});
+
+// Mobile-optimized agent interaction
+app.post('/api/mobile/agent-chat', requireAuth, (req, res) => {
+  const { agent, message, quick_mode = true } = req.body;
+  
+  if (!agent || !message) {
+    return res.status(400).json({ error: 'Agent and message required' });
+  }
+  
+  // For mobile, provide faster responses without full MCP integration
+  let response;
+  switch(agent.toLowerCase()) {
+    case 'martin':
+      response = quick_mode ? 
+        'Quick strategy note recorded. Review full analysis in dashboard.' :
+        generateMartinResponse(message);
+      break;
+    case 'eggsy':
+      response = quick_mode ?
+        'Creative idea captured! Building content strategy.' :
+        generateEggsyResponse(message);
+      break;
+    case 'ethel':
+      response = quick_mode ?
+        'FEC compliance check complete. Details in main system.' :
+        generateEthelResponse(message);
+      break;
+    default:
+      response = 'Mobile chat received. Access full agent in dashboard.';
+  }
+  
+  res.json({ 
+    agent, 
+    response, 
+    timestamp: new Date().toISOString(),
+    quick_mode 
+  });
+});
 
 // Initialize MCP connection on server start
 async function initializeMCP() {

@@ -281,6 +281,88 @@ class CampaignDatabase {
     console.log('✅ Database tables initialized');
   }
 
+  // Mobile-optimized methods for quick operations
+  addMobileExpense(expense, callback) {
+    const sql = `INSERT INTO campaign_expenses 
+      (amount, vendor, category, description, date, classification, fec_compliant, user_id, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`;
+    
+    const values = [
+      expense.amount,
+      expense.vendor,
+      expense.category || 'uncategorized',
+      expense.description || '',
+      expense.date,
+      expense.classification || 'mobile',
+      expense.fec_compliant !== false,
+      expense.user_id
+    ];
+    
+    if (this.isPostgres) {
+      this.db.query(sql.replace(/\?/g, (match, offset) => `$${values.slice(0, offset).length + 1}`), values)
+        .then(result => callback(null, result))
+        .catch(callback);
+    } else {
+      try {
+        const stmt = this.db.prepare(sql);
+        const result = stmt.run(...values);
+        callback(null, result);
+      } catch (error) {
+        callback(error);
+      }
+    }
+  }
+
+  getMobileStatus(userId, callback) {
+    const sql = `SELECT 
+      (SELECT COUNT(*) FROM campaign_expenses WHERE user_id = ? AND date = date('now')) as today_expenses,
+      (SELECT COUNT(*) FROM entries WHERE user_id = ? AND created_at > datetime('now', '-24 hours')) as recent_entries,
+      (SELECT COUNT(*) FROM agent_responses WHERE user_id = ? AND created_at > datetime('now', '-24 hours')) as recent_chats
+    `;
+    
+    if (this.isPostgres) {
+      this.db.query(sql.replace(/\?/g, (match, offset) => `$${[userId, userId, userId].slice(0, offset).length + 1}`), [userId, userId, userId])
+        .then(result => callback(null, result.rows[0]))
+        .catch(callback);
+    } else {
+      try {
+        const stmt = this.db.prepare(sql);
+        const result = stmt.get(userId, userId, userId);
+        callback(null, result);
+      } catch (error) {
+        callback(error);
+      }
+    }
+  }
+
+  addMobileNote(note, callback) {
+    const sql = `INSERT INTO entries 
+      (user_id, content, type, category, agent, created_at)
+      VALUES (?, ?, ?, ?, ?, datetime('now'))`;
+    
+    const values = [
+      note.user_id,
+      note.content,
+      note.type || 'note',
+      note.category || 'mobile',
+      note.agent || 'mobile'
+    ];
+    
+    if (this.isPostgres) {
+      this.db.query(sql.replace(/\?/g, (match, offset) => `$${values.slice(0, offset).length + 1}`), values)
+        .then(result => callback(null, result))
+        .catch(callback);
+    } else {
+      try {
+        const stmt = this.db.prepare(sql);
+        const result = stmt.run(...values);
+        callback(null, result);
+      } catch (error) {
+        callback(error);
+      }
+    }
+  }
+
   async close() {
     if (this.isPostgres) {
       await this.db.end();
