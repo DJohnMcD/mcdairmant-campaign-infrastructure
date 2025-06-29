@@ -8,10 +8,15 @@ class CampaignDatabase {
   constructor() {
     this.db = null;
     this.isPostgres = false;
-    this.initialize();
+    this.initPromise = this.initialize();
   }
 
-  initialize() {
+  async ready() {
+    await this.initPromise;
+    return this;
+  }
+
+  async initialize() {
     const databaseUrl = process.env.DATABASE_URL || 'sqlite:./personal_ai.db';
     
     console.log('🔍 Database URL detected:', databaseUrl ? databaseUrl.replace(/:[^:@]*@/, ':***@') : 'undefined');
@@ -23,7 +28,7 @@ class CampaignDatabase {
       this.initializeSQLite(databaseUrl);
     }
     
-    this.createTables();
+    await this.createTables();
   }
 
   initializePostgres(databaseUrl) {
@@ -102,7 +107,7 @@ class CampaignDatabase {
     return await this.query(sql, params);
   }
 
-  createTables() {
+  async createTables() {
     console.log('🗂️ Creating campaign database tables...');
     
     const tables = this.isPostgres ? [
@@ -267,14 +272,16 @@ class CampaignDatabase {
     for (const sql of tables) {
       try {
         if (this.isPostgres) {
-          // For PostgreSQL, we need to execute asynchronously
-          this.db.query(sql).catch(console.error);
+          // For PostgreSQL, await each table creation
+          await this.db.query(sql);
+          console.log('✓ Created table:', sql.match(/CREATE TABLE IF NOT EXISTS (\w+)/)?.[1] || 'unknown');
         } else {
           // For SQLite, execute synchronously
           this.db.exec(sql);
         }
       } catch (error) {
-        console.error('Table creation error:', error.message);
+        console.error('❌ Table creation error:', error.message);
+        console.error('Failed SQL:', sql.substring(0, 100) + '...');
       }
     }
     

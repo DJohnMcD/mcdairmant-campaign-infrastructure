@@ -2346,6 +2346,9 @@ app.listen(PORT, async () => {
   console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
   console.log(`Terri Chat: http://localhost:${PORT}/terri`);
   
+  // Initialize database tables
+  await db.ready();
+  
   // Initialize MCP connection
   await initializeMCP();
 });
