@@ -116,7 +116,7 @@ function requireAuth(req, res, next) {
 // Routes
 app.get('/', (req, res) => {
   if (req.session.userId) {
-    res.redirect('/dashboard');
+    res.redirect('/donor-form');
   } else {
     res.redirect('/login');
   }
@@ -205,6 +205,10 @@ app.get('/dashboard', requireAuth, (req, res) => {
 
 app.get('/terri', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terri.html'));
+});
+
+app.get('/donor-form', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'donor-form.html'));
 });
 
 app.get('/logout', (req, res) => {
@@ -319,6 +323,56 @@ app.post('/api/agent/:agentName/respond', requireAuth, async (req, res) => {
   } catch (error) {
     console.error(`Error generating response for ${agentName}:`, error);
     res.status(500).json({ error: 'Failed to generate response' });
+  }
+});
+
+// Donor management API
+app.post('/api/donors', requireAuth, async (req, res) => {
+  const { name, email, phone, address, employer, occupation, interests, notes } = req.body;
+  
+  // Basic validation
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and email are required' });
+  }
+  
+  try {
+    const result = await db.run(
+      'INSERT INTO campaign_donors (name, email, phone, address, employer, occupation, total_contributions, compliance_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, email, phone, address, employer, occupation, 0, 'compliant']
+    );
+    
+    // Also add as an entry for campaign tracking
+    await db.run(
+      'INSERT INTO entries (user_id, type, content, tags) VALUES (?, ?, ?, ?)',
+      [
+        req.session.userId, 
+        'donor_contact',
+        `New donor contact: ${name} (${email})${interests ? ` - Interested in: ${interests}` : ''}${notes ? ` - Notes: ${notes}` : ''}`,
+        `donor,contact,${interests || 'general'}`
+      ]
+    );
+    
+    // Log audit event
+    await logAuditEvent(req.session.userId, 'donor_added', 'campaign_donors', result.lastInsertRowid || result.insertId, req.ip);
+    
+    res.json({ 
+      success: true, 
+      message: 'Donor information saved successfully',
+      id: result.lastInsertRowid || result.insertId
+    });
+  } catch (err) {
+    console.error('Error saving donor:', err);
+    res.status(500).json({ error: 'Failed to save donor information' });
+  }
+});
+
+app.get('/api/donors', requireAuth, async (req, res) => {
+  try {
+    const donors = await db.query('SELECT * FROM campaign_donors ORDER BY created_at DESC');
+    res.json(donors);
+  } catch (err) {
+    console.error('Error fetching donors:', err);
+    res.status(500).json({ error: 'Failed to fetch donors' });
   }
 });
 

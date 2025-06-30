@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McDairmant for Congress - Donor Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .campaign-logo {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        h1 {
+            color: #1f2937;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        input[type="text"], 
+        input[type="email"], 
+        input[type="tel"], 
+        textarea, 
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+        
+        input:focus, 
+        textarea:focus, 
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 16px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .compliance-notice {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .success-message {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+            display: none;
+        }
+        
+        .field-help {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 24px;
+        }
+        
+        .back-link a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-link a:hover {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="campaign-logo">🇺🇸</div>
+            <h1>McDairmant for Congress</h1>
+            <div class="subtitle">Donor Contact Information</div>
+        </div>
+        
+        <div id="successMessage" class="success-message">
+            Thank you! Your information has been saved successfully.
+        </div>
+        
+        <div id="errorMessage" class="error-message">
+            There was an error saving your information. Please try again.
+        </div>
+        
+        <form id="donorForm">
+            <div class="form-group">
+                <label for="name">Full Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+                <div class="field-help">We'll use this to send you campaign updates</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+                <div class="field-help">Optional - for text updates and volunteer opportunities</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" placeholder="Street address, City, State, ZIP"></textarea>
+                <div class="field-help">Required for contributions over $200 (FEC compliance)</div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="employer">Employer</label>
+                    <input type="text" id="employer" name="employer">
+                </div>
+                
+                <div class="form-group">
+                    <label for="occupation">Occupation</label>
+                    <input type="text" id="occupation" name="occupation">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="interests">Areas of Interest</label>
+                <select id="interests" name="interests">
+                    <option value="">Select an area...</option>
+                    <option value="agriculture">Agriculture & Rural Issues</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="education">Education</option>
+                    <option value="economy">Economy & Jobs</option>
+                    <option value="environment">Environment</option>
+                    <option value="veteran">Veteran Affairs</option>
+                    <option value="infrastructure">Infrastructure</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" placeholder="Any additional information or how you heard about our campaign..."></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Save Contact Information
+            </button>
+        </form>
+        
+        <div class="compliance-notice">
+            <strong>FEC Compliance Notice:</strong> Federal law requires us to collect and report the name, address, occupation, and employer of individuals whose contributions exceed $200 in an election cycle. Contributions are not tax deductible. Foreign nationals are prohibited from contributing.
+        </div>
+        
+        <div class="back-link">
+            <a href="/dashboard">← Back to Campaign Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('donorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Hide messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const donorData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                employer: formData.get('employer'),
+                occupation: formData.get('occupation'),
+                interests: formData.get('interests'),
+                notes: formData.get('notes')
+            };
+            
+            try {
+                const response = await fetch('/api/donors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(donorData)
+                });
+                
+                if (response.ok) {
+                    successMessage.style.display = 'block';
+                    this.reset();
+                    
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Auto-hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    throw new Error('Failed to save donor information');
+                }
+            } catch (error) {
+                console.error('Error saving donor:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.scrollIntoView({ behavior: 'smooth' });
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Contact Information';
+            }
+        });
+        
+        // Auto-format phone number
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})(\d{3})/, '($1) $2');
+            }
+            e.target.value = value;
+        });
+        
+        // Add subtle focus animations
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.01)';
+            });
+            
+            field.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
