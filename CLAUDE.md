@@ -6,14 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-- **Start server**: `npm start` or `node server.js` - Runs the campaign infrastructure web server on port 8080
+- **Start server**: `npm start` or `node server.js` - Runs the campaign infrastructure web server on port 8080 (or PORT env var)
 - **Development**: `npm run dev` - Runs server with nodemon for auto-restart on changes (requires nodemon install)
 - **Install dependencies**: `npm install` - Install all required dependencies including MCP packages and pg
 - **Test MCP integration**: `node test-mcp.js` - Verify MCP server connections and agent functionality
+- **Test sequential thinking**: `node test-sequential-thinking.js` - Test MCP sequential thinking integration
 - **Test expense classification**: `node test-expense-classification.js` - Test expense categorization and CSV parsing
-- **Database**: Auto-detected from DATABASE_URL (SQLite local, PostgreSQL cloud)
+- **Test news intelligence**: `node test-news-intelligence.js` - Test daily briefing system
+- **Database debug**: `node debug-database-enhanced.js` - Debug database connectivity issues
 - **Stop all processes**: `pkill -f "node server.js"` - Kill any running server instances
 - **Check syntax**: `node -c server.js` - Validate server.js syntax without running
+- **Deploy**: Triggered automatically via GitHub Actions on push to main branch
 
 ## Architecture
 
@@ -27,7 +30,7 @@ Campaign Infrastructure is a Node.js web application providing a specialized mul
 - **Eggsy - Creative/Content Director**: Social media strategy, messaging, creative campaigns for rural NY-24 voters (content data access)
 - **Ethel - Legal/Compliance Director**: FEC compliance, campaign finance law, ethical guidelines (compliance data access, receives strategic shares from Terri)
 
-**Database Architecture** (SQLite): Campaign-optimized data stores with privacy boundaries:
+**Database Architecture** (Hybrid SQLite/PostgreSQL): Campaign-optimized data stores with privacy boundaries, automatically detected via DATABASE_URL:
 - `users`: User authentication and sessions
 - `entries`: Campaign entries with auto-categorization (task/journal/note/strategy)
 - `agent_responses`: Shared campaign conversations (Martin, Eggsy, Ethel)
@@ -154,9 +157,13 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 - Authentication pages with session management
 
 **Testing Infrastructure**:
-- `test-mcp.js` - MCP integration testing suite
+- `test-mcp.js` - MCP integration testing suite with privacy filtering
+- `test-sequential-thinking.js` - MCP sequential thinking server integration testing
 - `test-expense-classification.js` - Financial tracking system testing with expense categorization examples
-- `test-*.js` - Various component and agent-specific tests
+- `test-news-intelligence.js` - Daily briefing and news monitoring testing
+- `test-database.js` - Database connectivity and schema validation
+- `debug-database-enhanced.js` - Comprehensive database debugging with environment detection
+- Various test files for specific components and agents
 
 **Legacy Components**:
 - `archive/` - Original Google Calendar OAuth2 integration preserved for potential event management integration
@@ -168,9 +175,15 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 **MCP Integration Flow**: 
 1. Agent receives user input
 2. Privacy filter processes data based on agent role (strict/moderate/audit)
-3. MCP client calls external structured thinking tools if available
+3. MCP client calls external structured thinking tools if available (sequential thinking server)
 4. Enhanced response combines agent personality with MCP insights
 5. Audit logging tracks all MCP interactions for compliance
+
+**Sequential Thinking Integration**: The system integrates with `@modelcontextprotocol/server-sequential-thinking` for systematic problem-solving:
+- Available via `mcpClient.callTool('sequentialthinking', {...})` 
+- Provides structured step-by-step analysis for complex campaign decisions
+- Used for debugging, strategy planning, and systematic decision-making
+- Connection managed automatically in `mcp-client.js` with retry logic
 
 **Privacy Architecture**: 
 - Terri's conversations are isolated in `terri_private` table
@@ -235,7 +248,9 @@ These priorities transform the system from local development to live campaign op
 **Mobile-Optimized Endpoints:**
 - `GET /api/mobile/status` - Server status and user info
 - `GET /api/mobile/repo-info` - GitHub repository information for Claude access
+- `GET /api/mobile/dashboard` - Mobile dashboard with daily metrics
 - `POST /api/mobile/quick-expense` - Fast expense entry for field operations
+- `POST /api/mobile/add-note` - Handwriting OCR notes from Claude mobile app
 - `POST /api/mobile/agent-chat` - Quick agent interactions with `quick_mode=true`
 
 **Remote Development Workflow:**
@@ -249,3 +264,27 @@ These priorities transform the system from local development to live campaign op
 - Claude mobile app's built-in OCR handles handwritten campaign notes effectively
 - Notes can be processed into campaign tasks, strategies, or compliance items
 - Mobile endpoints support quick categorization and agent routing
+
+## Database Management
+
+**Critical Database Implementation Details:**
+
+**CampaignDatabase Class** (`database.js`): Provides database abstraction layer with automatic PostgreSQL/SQLite detection:
+- Uses `DATABASE_URL` environment variable to detect database type
+- PostgreSQL for production (Render cloud deployment)
+- SQLite with better-sqlite3 for local development
+- `async ready()` method ensures tables are created before server accepts requests
+- `createTables()` method creates both PostgreSQL and SQLite-compatible schemas
+
+**Important**: The database constructor initializes asynchronously. Always await `db.ready()` in server startup to ensure tables exist before processing requests.
+
+**Environment Variables for Deployment:**
+- `DATABASE_URL` - PostgreSQL connection string (case-sensitive, must be uppercase)
+- `NODE_ENV=production` - Enables PostgreSQL SSL and production optimizations
+- `SESSION_SECRET` - Strong random string for session security
+- `PORT` - Auto-set by cloud platforms, defaults to 8080
+
+**Cloud Deployment Requirements:**
+- Set `DATABASE_URL` exactly as provided by PostgreSQL service (case-sensitive)
+- Ensure PostgreSQL service is in same region as web service
+- Tables are auto-created on startup with proper async/await handling

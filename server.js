@@ -151,8 +151,12 @@ app.get('/register', (req, res) => {
 app.post('/register', authLimiter, async (req, res) => {
   const { username, password, email } = req.body;
   
+  console.log('Registration attempt:', { username, email, hasPassword: !!password });
+  console.log('Approved emails:', APPROVED_EMAILS);
+  
   // Check if email is in approved list
   if (!APPROVED_EMAILS.includes(email)) {
+    console.log('Email not approved:', email);
     return res.status(403).json({ 
       error: 'Registration by invitation only. Contact campaign administrator.' 
     });
@@ -168,16 +172,30 @@ app.post('/register', authLimiter, async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 12); // Increased rounds for security
   
   try {
+    console.log('Attempting to insert user:', { username, email });
     const result = await db.run('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)', [username, hashedPassword, email, new Date().toISOString()]);
     
+    console.log('User created successfully:', result);
     // Log successful registration
-    await logAuditEvent(result.lastInsertRowid, 'user_registered', 'users', result.lastInsertRowid, req.ip);
+    await logAuditEvent(result.lastInsertRowid || result.insertId, 'user_registered', 'users', result.lastInsertRowid || result.insertId, req.ip);
     
-    req.session.userId = result.lastInsertRowid;
+    req.session.userId = result.lastInsertRowid || result.insertId;
     res.redirect('/dashboard');
   } catch (err) {
-    console.error('Registration error:', err);
-    return res.status(400).json({ error: 'Username already exists' });
+    console.error('Registration error details:', err);
+    console.error('Error code:', err.code);
+    console.error('Error constraint:', err.constraint);
+    
+    if (err.code === '23505' || err.code === 'SQLITE_CONSTRAINT') {
+      // Unique constraint violation
+      if (err.constraint && err.constraint.includes('username')) {
+        return res.status(400).json({ error: 'Username already exists' });
+      } else if (err.constraint && err.constraint.includes('email')) {
+        return res.status(400).json({ error: 'Email already registered' });
+      }
+    }
+    
+    return res.status(500).json({ error: 'Registration failed: ' + err.message });
   }
 });
 
@@ -2246,6 +2264,29 @@ app.get('/api/mobile/dashboard', requireAuth, (req, res) => {
       last_updated: new Date().toISOString()
     });
   });
+});
+
+// Debug endpoint to check users (temporary)
+app.get('/api/debug/users', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    // Only allow in production for debugging deployment issues
+  }
+  
+  const sql = 'SELECT id, username, email, created_at FROM users ORDER BY created_at DESC LIMIT 10';
+  
+  if (db.isPostgres) {
+    db.db.query(sql)
+      .then(result => res.json({ users: result.rows }))
+      .catch(err => res.status(500).json({ error: err.message }));
+  } else {
+    try {
+      const stmt = db.db.prepare(sql);
+      const users = stmt.all();
+      res.json({ users });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
 });
 
 // Add mobile note from handwriting OCR
