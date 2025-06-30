@@ -173,7 +173,7 @@ app.post('/register', authLimiter, async (req, res) => {
   
   try {
     console.log('Attempting to insert user:', { username, email });
-    const result = await db.run('INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)', [username, hashedPassword, email, new Date().toISOString()]);
+    const result = await db.run('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [username, hashedPassword, email]);
     
     console.log('User created successfully:', result);
     // Log successful registration
