@@ -193,6 +193,26 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 
 **NY-24 Integration**: The `NY24_HELPERS` object provides district-specific functions for content relevance assessment, county-targeted messaging, and voter priority calculation that should be used throughout the campaign workflow.
 
+## Development Acceleration Plan
+
+**August 2025 Timeline**: Campaign infrastructure must be production-ready in 30 days for NY-24 race.
+
+**Current Status**: Foundation 80% complete, core campaign tools 30% complete.
+
+**Acceleration Strategy**: See `ACCELERATION-STRATEGY.md` for detailed development plan including:
+- Resource multiplication through developer hiring ($15-25K budget)
+- Claude tier upgrade for enhanced development capability  
+- Technology integration vs custom development priorities
+- MVP scope reduction (4 core functions for August launch)
+
+**Recommended Next Steps**:
+1. Upgrade Claude tier for extended development sessions
+2. Hire 1-2 full-stack developers for 2-3 month sprint
+3. Focus on donation processing, volunteer management, event planning, expense tracking
+4. Test with real campaign volunteers every week
+
+**2028 Vision**: Open source "Campaign in a Box" for widespread candidate adoption.
+
 **Financial System Architecture**: The expense tracking system uses a multi-layered approach:
 1. **Automatic Classification**: `classifyExpense()` function analyzes vendor names and descriptions to categorize expenses as campaign, personal, or art project
 2. **Bank Reconciliation**: `parseCSVTransactions()` handles bank statement imports with automatic matching via `findAutoMatches()`
