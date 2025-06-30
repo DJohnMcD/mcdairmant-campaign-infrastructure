@@ -212,6 +212,40 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+// Admin endpoint to reset user account (for development)
+app.post('/admin/reset-user', authLimiter, async (req, res) => {
+  const { email, confirm } = req.body;
+  
+  if (confirm !== 'DELETE_USER_ACCOUNT') {
+    return res.status(400).json({ error: 'Invalid confirmation' });
+  }
+  
+  if (!APPROVED_EMAILS.includes(email)) {
+    return res.status(403).json({ error: 'Email not in approved list' });
+  }
+  
+  try {
+    // Delete user and all associated data
+    const user = await db.get('SELECT id FROM users WHERE email = ?', [email]);
+    if (user) {
+      await db.run('DELETE FROM audit_log WHERE user_id = ?', [user.id]);
+      await db.run('DELETE FROM terri_private WHERE user_id = ?', [user.id]);
+      await db.run('DELETE FROM agent_responses WHERE user_id = ?', [user.id]);
+      await db.run('DELETE FROM entries WHERE user_id = ?', [user.id]);
+      await db.run('DELETE FROM campaign_expenses WHERE user_id = ?', [user.id]);
+      await db.run('DELETE FROM users WHERE id = ?', [user.id]);
+      
+      console.log(`User account reset for email: ${email}`);
+      res.json({ success: true, message: 'User account deleted successfully' });
+    } else {
+      res.json({ success: true, message: 'No user found with that email' });
+    }
+  } catch (err) {
+    console.error('Error resetting user:', err);
+    res.status(500).json({ error: 'Failed to reset user account' });
+  }
+});
+
 // API Routes
 app.post('/api/entry', requireAuth, async (req, res) => {
   const { content, type } = req.body;
