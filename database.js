@@ -74,9 +74,17 @@ class CampaignDatabase {
 
   async query(sql, params = []) {
     if (this.isPostgres) {
+      // Convert SQLite-style ? placeholders to PostgreSQL-style $1, $2, etc.
+      let pgSql = sql;
+      let paramIndex = 1;
+      while (pgSql.includes('?')) {
+        pgSql = pgSql.replace('?', `$${paramIndex}`);
+        paramIndex++;
+      }
+      
       const client = await this.db.connect();
       try {
-        const result = await client.query(sql, params);
+        const result = await client.query(pgSql, params);
         return result.rows;
       } finally {
         client.release();
@@ -95,8 +103,21 @@ class CampaignDatabase {
 
   async get(sql, params = []) {
     if (this.isPostgres) {
-      const result = await this.query(sql, params);
-      return result[0] || null;
+      // Convert SQLite-style ? placeholders to PostgreSQL-style $1, $2, etc.
+      let pgSql = sql;
+      let paramIndex = 1;
+      while (pgSql.includes('?')) {
+        pgSql = pgSql.replace('?', `$${paramIndex}`);
+        paramIndex++;
+      }
+      
+      const client = await this.db.connect();
+      try {
+        const result = await client.query(pgSql, params);
+        return result.rows[0] || null;
+      } finally {
+        client.release();
+      }
     } else {
       const stmt = this.db.prepare(sql);
       return stmt.get(params) || null;
@@ -104,7 +125,36 @@ class CampaignDatabase {
   }
 
   async run(sql, params = []) {
-    return await this.query(sql, params);
+    if (this.isPostgres) {
+      // Convert SQLite-style ? placeholders to PostgreSQL-style $1, $2, etc.
+      let pgSql = sql;
+      let paramIndex = 1;
+      while (pgSql.includes('?')) {
+        pgSql = pgSql.replace('?', `$${paramIndex}`);
+        paramIndex++;
+      }
+      
+      // Add RETURNING id for INSERT statements to get the inserted ID
+      if (pgSql.trim().toUpperCase().startsWith('INSERT') && !pgSql.includes('RETURNING')) {
+        pgSql += ' RETURNING id';
+      }
+      
+      const client = await this.db.connect();
+      try {
+        const result = await client.query(pgSql, params);
+        return { 
+          insertId: result.rows[0]?.id || result.rowCount, 
+          changes: result.rowCount,
+          lastInsertRowid: result.rows[0]?.id || result.rowCount
+        };
+      } finally {
+        client.release();
+      }
+    } else {
+      const stmt = this.db.prepare(sql);
+      const result = stmt.run(params);
+      return { insertId: result.lastInsertRowid, changes: result.changes, lastInsertRowid: result.lastInsertRowid };
+    }
   }
 
   async createTables() {

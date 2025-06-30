@@ -1,150 +1,141 @@
-2025-06-29T19:04:42.618451471Z   internalQuery: undefined,
-2025-06-29T19:04:42.618455332Z   where: undefined,
-2025-06-29T19:04:42.618459561Z   schema: undefined,
-2025-06-29T19:04:42.618463972Z   table: undefined,
-2025-06-29T19:04:42.618467752Z   column: undefined,
-2025-06-29T19:04:42.618471532Z   dataType: undefined,
-2025-06-29T19:04:42.618475582Z   constraint: undefined,
-2025-06-29T19:04:42.618479392Z   file: 'scan.l',
-2025-06-29T19:04:42.618483612Z   line: '1236',
-2025-06-29T19:04:42.618487792Z   routine: 'scanner_yyerror'
-2025-06-29T19:04:42.618491813Z }
-2025-06-29T19:07:06.690153251Z ==> Deploying...
-2025-06-29T19:07:17.039109535Z 
-2025-06-29T19:07:17.039157858Z > personal-ai-assistant@1.0.0 start
-2025-06-29T19:07:17.039167418Z > node server.js
-2025-06-29T19:07:17.039170368Z 
-2025-06-29T19:07:19.641149878Z 🔍 Database URL detected: postgresql://campaign_user:***@dpg-d1g6avjipnbc73acf5tg-a.ohio-postgres.render.com/campaign_infrastructure
-2025-06-29T19:07:19.641557661Z 🔍 NODE_ENV: production
-2025-06-29T19:07:19.641635265Z 🐘 Initializing PostgreSQL connection for cloud deployment...
-2025-06-29T19:07:20.135496665Z ✅ PostgreSQL connection initialized
-2025-06-29T19:07:20.135656214Z 🗂️ Creating campaign database tables...
-2025-06-29T19:07:20.237003211Z ✅ Database tables initialized
-2025-06-29T19:07:20.240632787Z Warning: connect.session() MemoryStore is not
-2025-06-29T19:07:20.240647648Z designed for a production environment, as it will leak
-2025-06-29T19:07:20.240650569Z memory, and will not scale past a single process.
-2025-06-29T19:07:20.337386105Z Personal AI Assistant running on http://localhost:10000
-2025-06-29T19:07:20.337492631Z Dashboard: http://localhost:10000/dashboard
-2025-06-29T19:07:20.337546014Z Terri Chat: http://localhost:10000/terri
-2025-06-29T19:07:20.337715283Z Attempting to connect to MCP structured thinking server...
-2025-06-29T19:07:26.342628662Z Database error: error: syntax error at end of input
-2025-06-29T19:07:26.342654202Z     at /app/node_modules/pg/lib/client.js:545:17
-2025-06-29T19:07:26.342660622Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2025-06-29T19:07:26.342664983Z     at async CampaignDatabase.query (/app/database.js:74:24)
-2025-06-29T19:07:26.342669523Z     at async CampaignDatabase.get (/app/database.js:93:22)
-2025-06-29T19:07:26.342673763Z     at async /app/server.js:128:18 {
-2025-06-29T19:07:26.342678093Z   length: 91,
-2025-06-29T19:07:26.342682763Z   severity: 'ERROR',
-2025-06-29T19:07:26.342696383Z   code: '42601',
-2025-06-29T19:07:26.342699093Z   detail: undefined,
-2025-06-29T19:07:26.342701424Z   hint: undefined,
-2025-06-29T19:07:26.342704093Z   position: '39',
-2025-06-29T19:07:26.342707824Z   internalPosition: undefined,
-2025-06-29T19:07:26.342710454Z   internalQuery: undefined,
-2025-06-29T19:07:26.342712754Z   where: undefined,
-2025-06-29T19:07:26.342715054Z   schema: undefined,
-2025-06-29T19:07:26.342717724Z   table: undefined,
-2025-06-29T19:07:26.342720004Z   column: undefined,
-2025-06-29T19:07:26.342722484Z   dataType: undefined,
-2025-06-29T19:07:26.342724964Z   constraint: undefined,
-2025-06-29T19:07:26.342727324Z   file: 'scan.l',
-2025-06-29T19:07:26.342729564Z   line: '1236',
-2025-06-29T19:07:26.342731834Z   routine: 'scanner_yyerror'
-2025-06-29T19:07:26.342734084Z }
-2025-06-29T19:07:27.360405664Z ==> Your service is live 🎉
-2025-06-29T19:07:27.432264684Z ==> 
-2025-06-29T19:07:27.501097455Z ==> ///////////////////////////////////////////////////////////
-2025-06-29T19:07:27.583144324Z ==> 
-2025-06-29T19:07:27.661338934Z ==> Available at your primary URL https://mcdairmant-campaign-infrastructure.onrender.com
-2025-06-29T19:07:27.733996034Z ==> 
-2025-06-29T19:07:27.748348313Z Sequential Thinking MCP Server running on stdio
-2025-06-29T19:07:27.807155004Z ==> ///////////////////////////////////////////////////////////
-2025-06-29T19:07:27.846799377Z Connected to MCP structured thinking server
-2025-06-29T19:07:27.846877301Z ✓ MCP structured thinking server connected successfully
-2025-06-29T19:07:27.934887793Z ✓ Available MCP tools: sequentialthinking
-2025-06-29T19:08:27.679043733Z npm error path /app
-2025-06-29T19:08:27.679062954Z npm error command failed
-2025-06-29T19:08:27.679067734Z npm error signal SIGTERM
-2025-06-29T19:08:27.679072264Z npm error command sh -c node server.js
-2025-06-29T19:08:27.679076494Z npm error A complete log of this run can be found in: /home/campaign/.npm/_logs/2025-06-29T19_00_59_552Z-debug-0.log
-2025-06-29T19:12:28.442914691Z ==> Detected service running on port 10000
-2025-06-29T19:12:28.624333149Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
-2025-06-29T19:13:39.320729335Z ==> Deploying...
-2025-06-29T19:13:50.699487664Z 
-2025-06-29T19:13:50.699535197Z > personal-ai-assistant@1.0.0 start
-2025-06-29T19:13:50.699540288Z > node server.js
-2025-06-29T19:13:50.699542538Z 
-2025-06-29T19:13:53.20633042Z 🔍 Database URL detected: postgresql://campaign_user:***@dpg-d1g6avjipnbc73acf5tg-a.ohio-postgres.render.com/campaign_infrastructure
-2025-06-29T19:13:53.206892455Z 🔍 NODE_ENV: production
-2025-06-29T19:13:53.2069811Z 🐘 Initializing PostgreSQL connection for cloud deployment...
-2025-06-29T19:13:53.697679118Z ✅ PostgreSQL connection initialized
-2025-06-29T19:13:53.697831058Z 🗂️ Creating campaign database tables...
-2025-06-29T19:13:53.797229329Z Warning: connect.session() MemoryStore is not
-2025-06-29T19:13:53.79724814Z designed for a production environment, as it will leak
-2025-06-29T19:13:53.79725106Z memory, and will not scale past a single process.
-2025-06-29T19:13:53.803055646Z Personal AI Assistant running on http://localhost:10000
-2025-06-29T19:13:53.803203975Z Dashboard: http://localhost:10000/dashboard
-2025-06-29T19:13:53.803216896Z Terri Chat: http://localhost:10000/terri
-2025-06-29T19:13:54.367068775Z ✓ Created table: users
-2025-06-29T19:13:54.369360325Z ✓ Created table: entries
-2025-06-29T19:13:54.371028247Z ✓ Created table: agent_responses
-2025-06-29T19:13:54.379449934Z ✓ Created table: terri_private
-2025-06-29T19:13:54.396019872Z ✓ Created table: campaign_expenses
-2025-06-29T19:13:54.403768637Z ✓ Created table: campaign_donors
-2025-06-29T19:13:54.406309893Z ✓ Created table: audit_log
-2025-06-29T19:13:54.406319473Z ✅ Database tables initialized
-2025-06-29T19:13:54.406533747Z Attempting to connect to MCP structured thinking server...
-2025-06-29T19:14:00.104337528Z Sequential Thinking MCP Server running on stdio
-2025-06-29T19:14:00.20049848Z Connected to MCP structured thinking server
-2025-06-29T19:14:00.200524291Z ✓ MCP structured thinking server connected successfully
-2025-06-29T19:14:00.203177634Z ✓ Available MCP tools: sequentialthinking
-2025-06-29T19:14:00.440530604Z ==> Your service is live 🎉
-2025-06-29T19:14:00.514749015Z ==> 
-2025-06-29T19:14:00.585461495Z ==> ///////////////////////////////////////////////////////////
-2025-06-29T19:14:00.656417976Z ==> 
-2025-06-29T19:14:00.727547086Z ==> Available at your primary URL https://mcdairmant-campaign-infrastructure.onrender.com
-2025-06-29T19:14:00.801527376Z ==> 
-2025-06-29T19:14:00.870603327Z ==> ///////////////////////////////////////////////////////////
-2025-06-29T19:15:00.711168296Z npm error path /app
-2025-06-29T19:15:00.711206288Z npm error command failed
-2025-06-29T19:15:00.711344446Z npm error signal SIGTERM
-2025-06-29T19:15:00.711514676Z npm error command sh -c node server.js
-2025-06-29T19:15:00.713141568Z npm error A complete log of this run can be found in: /home/campaign/.npm/_logs/2025-06-29T19_07_16_458Z-debug-0.log
-2025-06-29T19:15:28.967472717Z ==> Deploying...
-2025-06-29T19:15:43.703703883Z 🔍 NODE_ENV: production
-2025-06-29T19:15:43.703798769Z 🐘 Initializing PostgreSQL connection for cloud deployment...
-2025-06-29T19:15:44.114947749Z ✅ PostgreSQL connection initialized
-2025-06-29T19:15:44.115152342Z 🗂️ Creating campaign database tables...
-2025-06-29T19:15:44.215201459Z Warning: connect.session() MemoryStore is not
-2025-06-29T19:15:44.21522116Z designed for a production environment, as it will leak
-2025-06-29T19:15:44.21522396Z memory, and will not scale past a single process.
-2025-06-29T19:15:44.307370601Z Personal AI Assistant running on http://localhost:10000
-2025-06-29T19:15:44.307396783Z Dashboard: http://localhost:10000/dashboard
-2025-06-29T19:15:44.307419554Z Terri Chat: http://localhost:10000/terri
-2025-06-29T19:15:44.819816537Z ✓ Created table: users
-2025-06-29T19:15:44.822847722Z ✓ Created table: entries
-2025-06-29T19:15:44.825186761Z ✓ Created table: agent_responses
-2025-06-29T19:15:44.826677757Z ✓ Created table: terri_private
-2025-06-29T19:15:44.828277379Z ✓ Created table: campaign_expenses
-2025-06-29T19:15:44.829583083Z ✓ Created table: campaign_donors
-2025-06-29T19:15:44.832996092Z ✓ Created table: audit_log
-2025-06-29T19:15:44.833007212Z ✅ Database tables initialized
-2025-06-29T19:15:44.833217806Z Attempting to connect to MCP structured thinking server...
-2025-06-29T19:15:49.777619093Z ==> Your service is live 🎉
-2025-06-29T19:15:49.851964023Z ==> 
-2025-06-29T19:15:49.921895764Z ==> ///////////////////////////////////////////////////////////
-2025-06-29T19:15:49.989299744Z ==> 
-2025-06-29T19:15:50.060671905Z ==> Available at your primary URL https://mcdairmant-campaign-infrastructure.onrender.com
-2025-06-29T19:15:50.132034696Z ==> 
-2025-06-29T19:15:50.200933566Z ==> ///////////////////////////////////////////////////////////
-2025-06-29T19:15:50.715173907Z Sequential Thinking MCP Server running on stdio
-2025-06-29T19:15:50.824009757Z Connected to MCP structured thinking server
-2025-06-29T19:15:50.824910185Z ✓ MCP structured thinking server connected successfully
-2025-06-29T19:15:50.909099286Z ✓ Available MCP tools: sequentialthinking
-2025-06-29T19:16:49.988634336Z npm error path /app
-2025-06-29T19:16:49.988697Z npm error command failed
-2025-06-29T19:16:49.98886126Z npm error signal SIGTERM
-2025-06-29T19:16:49.989047421Z npm error command sh -c node server.js
-2025-06-29T19:16:49.991159431Z npm error A complete log of this run can be found in: /home/campaign/.npm/_logs/2025-06-29T19_13_50_104Z-debug-0.log
-2025-06-29T19:20:48.055676146Z ==> Detected service running on port 10000
-2025-06-29T19:20:48.252508184Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-06-30T01:15:16.009262215Z ==> Cloning from https://github.com/DJohnMcD/mcdairmant-campaign-infrastructure
+2025-06-30T01:15:16.903030011Z ==> Checking out commit 62ba5b8f9dba87f69a9f74ba56ea198027b63edb in branch main
+2025-06-30T01:15:18.06893224Z ==> Downloading cache...
+2025-06-30T01:15:26.617591907Z ==> Transferred 194MB in 7s. Extraction took 0s.
+2025-06-30T01:15:31.506809513Z #1 [internal] load build definition from Dockerfile
+2025-06-30T01:15:31.506843084Z #1 transferring dockerfile: 1.22kB done
+2025-06-30T01:15:31.506845694Z #1 DONE 0.0s
+2025-06-30T01:15:31.506847694Z 
+2025-06-30T01:15:31.506849674Z #2 [internal] load metadata for docker.io/library/node:20-alpine
+2025-06-30T01:15:31.957756218Z #2 ...
+2025-06-30T01:15:31.957794299Z 
+2025-06-30T01:15:31.957801869Z #3 [auth] library/node:pull render-prod/docker-mirror-repository/library/node:pull token for us-west1-docker.pkg.dev
+2025-06-30T01:15:31.957806299Z #3 DONE 0.0s
+2025-06-30T01:15:32.10808517Z 
+2025-06-30T01:15:32.10810942Z #2 [internal] load metadata for docker.io/library/node:20-alpine
+2025-06-30T01:15:33.726352059Z #2 DONE 2.3s
+2025-06-30T01:15:33.838055417Z 
+2025-06-30T01:15:33.838077878Z #4 [internal] load .dockerignore
+2025-06-30T01:15:33.838081578Z #4 transferring context: 690B done
+2025-06-30T01:15:33.838084768Z #4 DONE 0.0s
+2025-06-30T01:15:33.838087268Z 
+2025-06-30T01:15:33.838090808Z #5 importing cache manifest from local:5104145753103169848
+2025-06-30T01:15:33.838093978Z #5 inferred cache manifest type: application/vnd.oci.image.index.v1+json done
+2025-06-30T01:15:33.838096508Z #5 DONE 0.0s
+2025-06-30T01:15:33.838098808Z 
+2025-06-30T01:15:33.838101888Z #6 [ 1/11] FROM docker.io/library/node:20-alpine@sha256:674181320f4f94582c6182eaa151bf92c6744d478be0f1d12db804b7d59b2d11
+2025-06-30T01:15:33.838104488Z #6 resolve docker.io/library/node:20-alpine@sha256:674181320f4f94582c6182eaa151bf92c6744d478be0f1d12db804b7d59b2d11 0.0s done
+2025-06-30T01:15:33.838107068Z #6 DONE 0.0s
+2025-06-30T01:15:33.838109478Z 
+2025-06-30T01:15:33.838112218Z #7 [internal] load build context
+2025-06-30T01:15:33.838114768Z #7 transferring context: 985.26kB 0.0s done
+2025-06-30T01:15:33.838117659Z #7 DONE 0.0s
+2025-06-30T01:15:33.838119919Z 
+2025-06-30T01:15:33.838122339Z #8 [ 2/11] RUN apk add --no-cache python3 make g++
+2025-06-30T01:15:33.838124819Z #8 CACHED
+2025-06-30T01:15:33.838127169Z 
+2025-06-30T01:15:33.838129559Z #9 [ 4/11] RUN mkdir -p /app/uploads
+2025-06-30T01:15:33.838132019Z #9 CACHED
+2025-06-30T01:15:33.838134309Z 
+2025-06-30T01:15:33.838136719Z #10 [ 5/11] COPY package*.json ./
+2025-06-30T01:15:33.838139439Z #10 CACHED
+2025-06-30T01:15:33.838141749Z 
+2025-06-30T01:15:33.838144789Z #11 [ 3/11] WORKDIR /app
+2025-06-30T01:15:33.838147329Z #11 CACHED
+2025-06-30T01:15:33.838149629Z 
+2025-06-30T01:15:33.838152029Z #12 [ 6/11] RUN npm ci --only=production --ignore-optional
+2025-06-30T01:15:33.988263796Z #12 sha256:fe07684b16b82247c3539ed86a65ff37a76138ec25d380bd80c869a1a4c73236 3.80MB / 3.80MB 0.0s done
+2025-06-30T01:15:33.988285086Z #12 extracting sha256:fe07684b16b82247c3539ed86a65ff37a76138ec25d380bd80c869a1a4c73236
+2025-06-30T01:15:34.138345872Z #12 extracting sha256:fe07684b16b82247c3539ed86a65ff37a76138ec25d380bd80c869a1a4c73236 0.1s done
+2025-06-30T01:15:34.28852411Z #12 sha256:5432aa916e0868c8c9385ef60226d5ef530f13fe7c28fc13c054de1df6d006cd 20.97MB / 42.99MB 0.2s
+2025-06-30T01:15:34.395311695Z #12 sha256:5432aa916e0868c8c9385ef60226d5ef530f13fe7c28fc13c054de1df6d006cd 42.99MB / 42.99MB 0.4s done
+2025-06-30T01:15:34.545831592Z #12 extracting sha256:5432aa916e0868c8c9385ef60226d5ef530f13fe7c28fc13c054de1df6d006cd
+2025-06-30T01:15:35.856766321Z #12 extracting sha256:5432aa916e0868c8c9385ef60226d5ef530f13fe7c28fc13c054de1df6d006cd 1.4s done
+2025-06-30T01:15:35.856803571Z #12 sha256:2506673f55362e86b6c8a2ab9c01541ae636887386c92d06e01286d3ddd83871 1.26MB / 1.26MB 0.0s done
+2025-06-30T01:15:35.96372401Z #12 extracting sha256:2506673f55362e86b6c8a2ab9c01541ae636887386c92d06e01286d3ddd83871 0.1s done
+2025-06-30T01:15:35.963754471Z #12 sha256:98c4889b578e94078411d6c14fe8f5daa0303d43e82bbf84d5787ab657c42428 445B / 445B done
+2025-06-30T01:15:36.114015851Z #12 extracting sha256:98c4889b578e94078411d6c14fe8f5daa0303d43e82bbf84d5787ab657c42428 0.0s done
+2025-06-30T01:15:36.264383644Z #12 sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 24.12MB / 99.12MB 0.2s
+2025-06-30T01:15:36.414539442Z #12 sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 40.89MB / 99.12MB 0.3s
+2025-06-30T01:15:36.565597422Z #12 sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 62.91MB / 99.12MB 0.5s
+2025-06-30T01:15:36.715636457Z #12 sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 79.69MB / 99.12MB 0.6s
+2025-06-30T01:15:36.866281617Z #12 sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 99.12MB / 99.12MB 0.8s
+2025-06-30T01:15:37.017032769Z #12 sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 99.12MB / 99.12MB 0.8s done
+2025-06-30T01:15:37.01705539Z #12 extracting sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e
+2025-06-30T01:15:40.580638932Z #12 extracting sha256:88ee5023e3b3424c3296d41aec4cf0a7581b4b800d733f02d6655094a279948e 3.7s done
+2025-06-30T01:15:40.693049637Z #12 sha256:2daac478e13069e5cb52bab4d7bab402adc08ca4d2d524d2dc942934f0864f37 89B / 89B done
+2025-06-30T01:15:40.693076708Z #12 extracting sha256:2daac478e13069e5cb52bab4d7bab402adc08ca4d2d524d2dc942934f0864f37 0.0s done
+2025-06-30T01:15:40.693081278Z #12 sha256:f94c9a152d6b35375aad3a23ea7540c922774a830a5e2d5753839e54ad4b0e80 113B / 113B done
+2025-06-30T01:15:40.797879373Z #12 extracting sha256:f94c9a152d6b35375aad3a23ea7540c922774a830a5e2d5753839e54ad4b0e80 0.0s done
+2025-06-30T01:15:40.797898674Z #12 sha256:4d48e549d1d1928aa901f1bbb4a081fb58fdc42e125a3834645d7895386d4596 9.06kB / 9.06kB done
+2025-06-30T01:15:40.797902334Z #12 extracting sha256:4d48e549d1d1928aa901f1bbb4a081fb58fdc42e125a3834645d7895386d4596 0.0s done
+2025-06-30T01:15:41.098340233Z #12 sha256:1100e5542a1075a317cbc953751f8c5b9baf1244f9c863445062809d1464b667 20.39MB / 20.39MB 0.2s done
+2025-06-30T01:15:41.098356843Z #12 extracting sha256:1100e5542a1075a317cbc953751f8c5b9baf1244f9c863445062809d1464b667
+2025-06-30T01:15:43.049376918Z #12 extracting sha256:1100e5542a1075a317cbc953751f8c5b9baf1244f9c863445062809d1464b667 2.1s done
+2025-06-30T01:15:43.199740311Z #12 CACHED
+2025-06-30T01:15:43.199761732Z 
+2025-06-30T01:15:43.199767241Z #13 [ 7/11] COPY . .
+2025-06-30T01:15:43.199771332Z #13 DONE 0.0s
+2025-06-30T01:15:43.199798302Z 
+2025-06-30T01:15:43.199806262Z #14 [ 8/11] RUN find node_modules -name "*.node" -delete 2>/dev/null || true
+2025-06-30T01:15:43.301123621Z #14 DONE 0.2s
+2025-06-30T01:15:43.301144802Z 
+2025-06-30T01:15:43.301149762Z #15 [ 9/11] RUN npm rebuild bcrypt
+2025-06-30T01:15:44.318188036Z #15 0.972 rebuilt dependencies successfully
+2025-06-30T01:15:44.318206216Z #15 DONE 1.0s
+2025-06-30T01:15:44.432737365Z 
+2025-06-30T01:15:44.432764075Z #16 [10/11] RUN addgroup -g 1001 -S campaign &&     adduser -S campaign -u 1001 -G campaign
+2025-06-30T01:15:44.432770096Z #16 DONE 0.1s
+2025-06-30T01:15:44.583353994Z 
+2025-06-30T01:15:44.583377815Z #17 [11/11] RUN chown -R campaign:campaign /app
+2025-06-30T01:16:03.067790748Z #17 DONE 18.5s
+2025-06-30T01:16:03.067812709Z 
+2025-06-30T01:16:03.067816979Z #18 exporting to docker image format
+2025-06-30T01:16:03.067820349Z #18 exporting layers
+2025-06-30T01:16:04.914573793Z #18 exporting layers 1.8s done
+2025-06-30T01:16:04.914605414Z #18 exporting manifest sha256:ca4d9e7ce54a6560fa73454b256370f5dd28bb524407be3d06a3a5fda6d49746 0.0s done
+2025-06-30T01:16:04.914631484Z #18 exporting config sha256:a834d43aa70928a0185ea7527c92f45e6d7cbf043c1342575592662b2182008d 0.0s done
+2025-06-30T01:16:06.966424176Z #18 DONE 3.9s
+2025-06-30T01:16:06.966444096Z 
+2025-06-30T01:16:06.966449427Z #19 exporting cache to client directory
+2025-06-30T01:16:06.966453367Z #19 preparing build cache for export
+2025-06-30T01:16:07.250822184Z #19 writing cache manifest sha256:0f4945bfe36a65b68e62fa5d7d198b4d292318b0659ad73fed88fd810e703ce6 done
+2025-06-30T01:16:07.250835965Z #19 DONE 0.3s
+2025-06-30T01:16:16.230197716Z Pushing image to registry...
+2025-06-30T01:16:18.883724198Z Upload succeeded
+2025-06-30T01:16:23.039135483Z ==> Deploying...
+2025-06-30T01:16:33.87946648Z 
+2025-06-30T01:16:33.879505701Z > personal-ai-assistant@1.0.0 start
+2025-06-30T01:16:33.87950897Z > node server.js
+2025-06-30T01:16:33.879510861Z 
+2025-06-30T01:16:36.473533834Z 🔍 Database URL detected: postgresql://campaign_user:***@dpg-d1g6avjipnbc73acf5tg-a.ohio-postgres.render.com/campaign_infrastructure
+2025-06-30T01:16:36.473966523Z 🔍 NODE_ENV: production
+2025-06-30T01:16:36.474095915Z 🐘 Initializing PostgreSQL connection for cloud deployment...
+2025-06-30T01:16:36.880411096Z ✅ PostgreSQL connection initialized
+2025-06-30T01:16:36.880524678Z 🗂️ Creating campaign database tables...
+2025-06-30T01:16:36.979815824Z Warning: connect.session() MemoryStore is not
+2025-06-30T01:16:36.979836674Z designed for a production environment, as it will leak
+2025-06-30T01:16:36.979839924Z memory, and will not scale past a single process.
+2025-06-30T01:16:37.071940235Z Personal AI Assistant running on http://localhost:10000
+2025-06-30T01:16:37.071961195Z Dashboard: http://localhost:10000/dashboard
+2025-06-30T01:16:37.071974775Z Terri Chat: http://localhost:10000/terri
+2025-06-30T01:16:37.556434377Z ✓ Created table: users
+2025-06-30T01:16:37.571440877Z ✓ Created table: entries
+2025-06-30T01:16:37.572861263Z ✓ Created table: agent_responses
+2025-06-30T01:16:37.574156668Z ✓ Created table: terri_private
+2025-06-30T01:16:37.575715567Z ✓ Created table: campaign_expenses
+2025-06-30T01:16:37.57748808Z ✓ Created table: campaign_donors
+2025-06-30T01:16:37.578823435Z ✓ Created table: audit_log
+2025-06-30T01:16:37.578834275Z ✅ Database tables initialized
+2025-06-30T01:16:37.578990458Z Attempting to connect to MCP structured thinking server...
+2025-06-30T01:16:43.079318191Z Sequential Thinking MCP Server running on stdio
+2025-06-30T01:16:43.175827405Z Connected to MCP structured thinking server
+2025-06-30T01:16:43.175846385Z ✓ MCP structured thinking server connected successfully
+2025-06-30T01:16:43.178550316Z ✓ Available MCP tools: sequentialthinking
+2025-06-30T01:16:43.675675988Z ==> Your service is live 🎉
+2025-06-30T01:16:43.749329409Z ==> 
+2025-06-30T01:16:43.819875849Z ==> ///////////////////////////////////////////////////////////
+2025-06-30T01:16:43.892645279Z ==> 
+2025-06-30T01:16:43.96383785Z ==> Available at your primary URL https://mcdairmant-campaign-infrastructure.onrender.com
+2025-06-30T01:16:44.034017821Z ==> 
+2025-06-30T01:16:44.10822538Z ==> ///////////////////////////////////////////////////////////
