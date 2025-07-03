@@ -316,7 +316,11 @@ app.post('/register', authLimiter, async (req, res) => {
       if (err.constraint && err.constraint.includes('username')) {
         return res.status(400).json({ error: `Username "${username}" is already taken. Please choose a different display name.` });
       } else if (err.constraint && err.constraint.includes('email')) {
-        return res.status(400).json({ error: `Email "${email}" is already registered. If this is your email, please use the login page instead.` });
+        return res.status(400).json({ 
+          error: `Email "${email}" is already registered. If this is your email, please use the login page instead.`,
+          redirectToLogin: true,
+          loginUrl: '/login'
+        });
       }
     }
     
