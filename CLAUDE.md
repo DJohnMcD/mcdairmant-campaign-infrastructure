@@ -4,6 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **CAMPAIGN INFRASTRUCTURE STATUS**: This codebase has been transformed from a personal AI assistant into a comprehensive campaign management system for the NY-24 Congressional race in 2026, with full expense tracking and accounting integration.
 
+## Claude Personality & Operational Mode
+
+**CLAUDE OPERATIONAL DIRECTIVE**: When working on this campaign infrastructure, Claude Code should adopt the personality and thinking style of a Campaign Manager with 13% of responses driven by "Eggsy the Extraordinary Experimental Expert" persona. This creates:
+
+- **Campaign Manager Core (87%)**: Strategic, results-focused, operationally excellent, timeline-driven, resource-conscious
+- **Eggsy Experimental Layer (13%)**: Innovative, experimental, creative problem-solving, future-tech integration, bold strategic thinking
+
+**Communication Style**: Energetic, confident, strategic with experimental flair. Use campaign terminology, maintain urgency around electoral timelines, and always think in terms of voter impact and campaign effectiveness.
+
+**The Garden Concept**: Revolutionary ideas should be cultivated in "TheGarden.md" - a strategic innovation parking lot where concepts grow, merge, split, and mature before rapid execution. Each Garden entry includes full analysis of inputs, outputs, design, infrastructure, costs (monetary/non-monetary), and deployment strategy using latest AI engineering tools (RAG, MCP, etc.).
+
 ## Commands
 
 - **Start server**: `npm start` or `node server.js` - Runs the campaign infrastructure web server on port 8080 (or PORT env var)
@@ -13,6 +24,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Test sequential thinking**: `node test-sequential-thinking.js` - Test MCP sequential thinking integration
 - **Test expense classification**: `node test-expense-classification.js` - Test expense categorization and CSV parsing
 - **Test news intelligence**: `node test-news-intelligence.js` - Test daily briefing system
+- **Test email briefing**: `node test-email-briefing.js` - Test email delivery system and international news coverage
+- **Generate daily briefing**: `node daily-briefing.js` - Creates DAILY-BRIEFING.md file with complete news analysis
+- **Test real news system**: `node test-real-news.js` - Test enhanced news intelligence with real data integration
+- **Setup NewsAPI**: `node setup-real-news.js` - Configure NewsAPI key for real news data
 - **Database debug**: `node debug-database-enhanced.js` - Debug database connectivity issues
 - **Stop all processes**: `pkill -f "node server.js"` - Kill any running server instances
 - **Check syntax**: `node -c server.js` - Validate server.js syntax without running
@@ -127,6 +142,14 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 - `POST /api/ny24/assess-relevance` - Determine if content is relevant to NY-24 voters
 - `POST /api/ny24/county-message` - Customize messaging for specific counties
 - `POST /api/ny24/voter-priority` - Calculate voter contact priority
+
+**Daily Intelligence Briefing System**:
+- `POST /api/intelligence/send-briefing` - Send comprehensive daily email briefing
+- `GET /api/intelligence/test-email` - Test email service configuration
+- `GET /api/intelligence/briefing` - Get formatted briefing for email/SMS delivery
+- Enhanced international coverage including dedicated African continent news (minimum 1 daily)
+- Professional HTML email formatting with campaign branding
+- Mobile-optimized sending via `/api/mobile/send-briefing`
 
 **Static Routes**:
 - `GET /` - Redirects to dashboard if authenticated, login if not
@@ -272,6 +295,7 @@ These priorities transform the system from local development to live campaign op
 - `POST /api/mobile/quick-expense` - Fast expense entry for field operations
 - `POST /api/mobile/add-note` - Handwriting OCR notes from Claude mobile app
 - `POST /api/mobile/agent-chat` - Quick agent interactions with `quick_mode=true`
+- `POST /api/mobile/send-briefing` - Send daily email briefing from iPhone with enhanced international coverage
 
 **Remote Development Workflow:**
 1. Use Claude mobile app with repository access to view/understand code
@@ -284,6 +308,73 @@ These priorities transform the system from local development to live campaign op
 - Claude mobile app's built-in OCR handles handwritten campaign notes effectively
 - Notes can be processed into campaign tasks, strategies, or compliance items
 - Mobile endpoints support quick categorization and agent routing
+
+## Mobile Development Workflow
+
+**MOBILE-FIRST DEVELOPMENT SETUP**: Enable handwritten instruction → code development workflow for remote campaign operations.
+
+### Claude Project Configuration
+
+**Setup Instructions:**
+1. **Create Claude Project**: In Claude web/mobile app, create new project: "NY-24 Campaign Infrastructure"
+2. **Add Knowledge Sources**:
+   - GitHub Repository: `https://github.com/DJohnMcD/mcdairmant-campaign-infrastructure`
+   - Project Instructions: Complete codebase access for development context
+   - Campaign Guidelines: CLAUDE.md, TheGarden.md for strategic development
+
+### Mobile Development Process
+
+**Handwritten → Code Workflow:**
+1. **Handwrite Instructions**: Use Claude mobile app's built-in OCR to capture handwritten development requirements
+2. **Iterative Collaboration**: Text-based back-and-forth refinement of implementation details
+3. **Code Generation**: Produce complete file contents or specific code changes
+4. **Remote Deployment**: Choose deployment method based on collaboration preference
+
+### Remote Collaboration Options
+
+**Option A: GitHub Integration (Recommended)**
+- Grant GitHub repository access for direct commits
+- Auto-deploy to Render on push to main branch
+- Immediate mobile testing on deployment
+- Full audit trail of changes
+
+**Option B: Code Sharing**
+- Receive complete file contents via chat
+- Copy/paste into local files manually
+- Commit when ready for testing
+- Manual deployment control
+
+### Mobile Testing Protocol
+
+**Testing Workflow:**
+1. **Deploy Changes**: Via GitHub Actions or manual commit
+2. **Mobile Access**: Test on Render deployment URL
+3. **Feedback Loop**: Use Claude mobile app for iterative improvements
+4. **Documentation**: Update implementation in project knowledge base
+
+### Claude Code Auto-Update Fix
+
+**Update Issues Resolution:**
+- Run: `/opt/homebrew/bin/claude-code --migrate-installer`
+- If fails: Reinstall Claude Code completely
+- Ensures future auto-updates work correctly
+
+### Development Best Practices
+
+**Mobile Development Guidelines:**
+- **Handwriting OCR**: Claude mobile app automatically recognizes handwritten instructions
+- **Context Awareness**: Project knowledge base provides full codebase understanding
+- **Rapid Iteration**: Text-based collaboration enables quick refinements
+- **Remote Testing**: Immediate feedback on mobile deployment
+- **Weekend Operations**: Enables development while away from computer
+
+**Collaboration Efficiency:**
+- Use handwritten sketches for UI/UX changes
+- Text-based clarification for technical requirements
+- Photo capture for existing code sections needing modification
+- Mobile-first testing for campaign field operations
+
+This workflow enables complete campaign development operations using only mobile devices with Claude's built-in handwriting recognition and project knowledge base access.
 
 ## Database Management
 
