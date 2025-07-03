@@ -65,21 +65,27 @@
 </head>
 <body>
     <div class="register-container">
-        <h1>Create Account</h1>
+        <h1>Campaign Staff Registration</h1>
+        <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+            Registration is by invitation only. Use your approved campaign email address.
+        </p>
         <form action="/register" method="post">
             <div class="form-group">
-                <label for="username">Choose Username:</label>
-                <input type="text" id="username" name="username" required>
+                <label for="email">Campaign Email Address:</label>
+                <input type="email" id="email" name="email" required placeholder="your.name@mcdairmant.com">
+                <small style="color: #666; font-size: 12px;">Must be an approved campaign email address</small>
             </div>
             <div class="form-group">
-                <label for="email">Email Address:</label>
-                <input type="email" id="email" name="email" required>
+                <label for="username">Display Name:</label>
+                <input type="text" id="username" name="username" required placeholder="e.g., john, david, etc.">
+                <small style="color: #666; font-size: 12px;">This will be your display name in the system</small>
             </div>
             <div class="form-group">
                 <label for="password">Choose Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required minlength="8">
+                <small style="color: #666; font-size: 12px;">Minimum 8 characters required</small>
             </div>
-            <button type="submit">Create Account</button>
+            <button type="submit">Create Campaign Account</button>
         </form>
         <div class="login-link">
             <a href="/login">Already have an account? Login</a>

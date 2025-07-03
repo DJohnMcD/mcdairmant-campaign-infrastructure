@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal AI Assistant - Login</title>
+    <title>Campaign Infrastructure - Login</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -65,11 +65,11 @@
 </head>
 <body>
     <div class="login-container">
-        <h1>Personal AI Assistant</h1>
+        <h1>Campaign Infrastructure Login</h1>
         <form action="/login" method="post">
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
@@ -78,8 +78,98 @@
             <button type="submit">Login</button>
         </form>
         <div class="register-link">
-            <a href="/register">Create new account</a>
+            <a href="/register">Create new account</a> | 
+            <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; font-size: 13px; color: #666;">
+            <strong>Campaign Staff:</strong> Use your email address to login. If you don't have an account yet, registration is by invitation only with approved campaign email addresses.
+        </div>
+        
+        <!-- Forgot Password Modal -->
+        <div id="forgotModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
+                <h3>Reset Password</h3>
+                <p style="color: #666; margin-bottom: 20px;">Enter your email address and we'll send you a link to reset your password.</p>
+                <div id="forgotMessage" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 5px;"></div>
+                <form id="forgotForm">
+                    <input type="email" id="forgotEmail" placeholder="Enter your email address" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+                    <div style="text-align: right;">
+                        <button type="button" onclick="closeForgotPassword()" style="background: #ccc; color: #666; margin-right: 10px;">Cancel</button>
+                        <button type="submit" id="forgotBtn">Send Reset Link</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+
+    <script>
+        function showForgotPassword() {
+            document.getElementById('forgotModal').style.display = 'block';
+        }
+        
+        function closeForgotPassword() {
+            document.getElementById('forgotModal').style.display = 'none';
+            document.getElementById('forgotMessage').style.display = 'none';
+            document.getElementById('forgotForm').reset();
+        }
+        
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('forgotEmail').value;
+            const forgotBtn = document.getElementById('forgotBtn');
+            const messageEl = document.getElementById('forgotMessage');
+            
+            forgotBtn.disabled = true;
+            forgotBtn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageEl.style.backgroundColor = '#e6ffe6';
+                    messageEl.style.color = '#006600';
+                    messageEl.style.border = '1px solid #99ff99';
+                    messageEl.textContent = data.message;
+                    messageEl.style.display = 'block';
+                    
+                    // Hide form after successful submission
+                    setTimeout(() => {
+                        closeForgotPassword();
+                    }, 3000);
+                } else {
+                    messageEl.style.backgroundColor = '#ffe6e6';
+                    messageEl.style.color = '#cc0000';
+                    messageEl.style.border = '1px solid #ff9999';
+                    messageEl.textContent = data.error || 'Request failed';
+                    messageEl.style.display = 'block';
+                }
+            } catch (error) {
+                messageEl.style.backgroundColor = '#ffe6e6';
+                messageEl.style.color = '#cc0000';
+                messageEl.style.border = '1px solid #ff9999';
+                messageEl.textContent = 'Network error. Please try again.';
+                messageEl.style.display = 'block';
+            } finally {
+                forgotBtn.disabled = false;
+                forgotBtn.textContent = 'Send Reset Link';
+            }
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('forgotModal').addEventListener('click', (e) => {
+            if (e.target.id === 'forgotModal') {
+                closeForgotPassword();
+            }
+        });
+    </script>
 </body>
 </html>

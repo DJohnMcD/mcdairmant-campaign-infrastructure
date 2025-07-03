@@ -80,6 +80,8 @@ app.use('/api/auth/', authLimiter);
 const mcpClient = new MCPStructuredThinkingClient();
 const privacyFilter = new PrivacyFilter();
 const newsIntelligence = new CampaignNewsIntelligence();
+const EmailService = require('./email-service');
+const emailService = new EmailService();
 let mcpConnected = false;
 
 // Database setup with cloud compatibility
@@ -126,26 +128,149 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// Password reset request
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email address is required' });
+  }
   
   try {
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
+    // Check if user exists with this email
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+    
+    if (!user) {
+      // Don't reveal whether email exists or not for security
+      return res.json({ 
+        message: 'If this email is registered, you will receive password reset instructions shortly.' 
+      });
+    }
+    
+    // Generate reset token (simple approach for now)
+    const resetToken = require('crypto').randomBytes(32).toString('hex');
+    const resetExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+    
+    // Store reset token in database
+    await db.run(
+      'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
+      [resetToken, resetExpiry.toISOString(), user.id]
+    );
+    
+    // Send reset email if email service is configured
+    try {
+      const resetLink = `${process.env.DOMAIN_NAME || 'http://localhost:8080'}/reset-password?token=${resetToken}`;
+      
+      // Use existing email service
+      if (emailService && emailService.transporter) {
+        await emailService.transporter.sendMail({
+          from: process.env.FROM_EMAIL || 'noreply@mcdairmant.com',
+          to: email,
+          subject: 'Password Reset - Campaign Infrastructure',
+          html: `
+            <h2>Password Reset Request</h2>
+            <p>You requested a password reset for your campaign infrastructure account.</p>
+            <p>Click the link below to reset your password (expires in 1 hour):</p>
+            <p><a href="${resetLink}" style="background-color: #007AFF; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
+            <p>If you didn't request this reset, please ignore this email.</p>
+            <p><em>NY-24 Congressional Campaign 2026</em></p>
+          `
+        });
+        console.log(`Password reset email sent to ${email}`);
+      } else {
+        console.log(`Password reset requested for ${email}, reset token: ${resetToken}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send reset email:', emailError);
+      // Continue without sending email - user can still use token if they have access to logs
+    }
+    
+    res.json({ 
+      message: 'If this email is registered, you will receive password reset instructions shortly.' 
+    });
+    
+  } catch (err) {
+    console.error('Password reset error:', err);
+    res.status(500).json({ error: 'Password reset request failed. Please try again later.' });
+  }
+});
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+    // Support both email and username for backward compatibility
+    const user = await db.get('SELECT * FROM users WHERE email = ? OR username = ?', [email, email]);
     
     if (user && await bcrypt.compare(password, user.password)) {
       req.session.userId = user.id;
       res.redirect('/dashboard');
     } else {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: 'Invalid email or password. Please check your credentials and try again.' });
     }
   } catch (err) {
     console.error('Database error:', err);
-    return res.status(500).json({ error: 'Database error' });
+    return res.status(500).json({ error: 'Database error. Please try again later.' });
   }
 });
 
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+// Password reset page
+app.get('/reset-password', (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    return res.redirect('/login?error=invalid_reset_link');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+});
+
+// Process password reset
+app.post('/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+  
+  if (!token || !password) {
+    return res.status(400).json({ error: 'Reset token and new password are required' });
+  }
+  
+  if (password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+  }
+  
+  try {
+    // Find user with valid reset token
+    const user = await db.get(
+      'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > ?',
+      [token, new Date().toISOString()]
+    );
+    
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+    
+    // Hash new password and update user
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await db.run(
+      'UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
+      [hashedPassword, user.id]
+    );
+    
+    console.log(`Password reset completed for user ${user.email}`);
+    
+    // Auto-login the user
+    req.session.userId = user.id;
+    
+    res.json({ 
+      message: 'Password reset successful. You are now logged in.',
+      redirect: '/dashboard'
+    });
+    
+  } catch (err) {
+    console.error('Password reset error:', err);
+    res.status(500).json({ error: 'Password reset failed. Please try again.' });
+  }
 });
 
 app.post('/register', authLimiter, async (req, res) => {
@@ -158,7 +283,7 @@ app.post('/register', authLimiter, async (req, res) => {
   if (!APPROVED_EMAILS.includes(email)) {
     console.log('Email not approved:', email);
     return res.status(403).json({ 
-      error: 'Registration by invitation only. Contact campaign administrator.' 
+      error: `Registration by invitation only. "${email}" is not an approved campaign email address. Contact campaign administrator to add your email to the approved list.` 
     });
   }
   
@@ -189,9 +314,9 @@ app.post('/register', authLimiter, async (req, res) => {
     if (err.code === '23505' || err.code === 'SQLITE_CONSTRAINT') {
       // Unique constraint violation
       if (err.constraint && err.constraint.includes('username')) {
-        return res.status(400).json({ error: 'Username already exists' });
+        return res.status(400).json({ error: `Username "${username}" is already taken. Please choose a different display name.` });
       } else if (err.constraint && err.constraint.includes('email')) {
-        return res.status(400).json({ error: 'Email already registered' });
+        return res.status(400).json({ error: `Email "${email}" is already registered. If this is your email, please use the login page instead.` });
       }
     }
     
@@ -2179,6 +2304,48 @@ app.post('/api/intelligence/schedule-delivery', requireAuth, async (req, res) =>
   }
 });
 
+// Send daily briefing via email
+app.post('/api/intelligence/send-briefing', requireAuth, async (req, res) => {
+  const { email, includeInternational = true } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email address is required' });
+  }
+
+  try {
+    // Generate the daily briefing
+    const briefing = await newsIntelligence.generateDailyBriefing();
+    
+    // Send via email
+    const result = await emailService.sendDailyBriefing(briefing, email);
+    
+    res.json({
+      success: true,
+      message: `Daily briefing sent to ${email}`,
+      briefingDate: briefing.date,
+      priorityLevel: briefing.summary.priorityLevel,
+      articlesAnalyzed: briefing.summary.totalArticles,
+      emailResult: result
+    });
+  } catch (error) {
+    console.error('Error sending briefing email:', error);
+    res.status(500).json({ error: `Failed to send briefing: ${error.message}` });
+  }
+});
+
+// Test email service connection
+app.get('/api/intelligence/test-email', requireAuth, async (req, res) => {
+  try {
+    const result = await emailService.testConnection();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // Helper functions for news analysis
 function extractKeyTopics(articles) {
   const topicCounts = {};
@@ -2441,6 +2608,40 @@ app.post('/api/mobile/agent-chat', requireAuth, (req, res) => {
     timestamp: new Date().toISOString(),
     quick_mode 
   });
+});
+
+// Mobile-optimized daily briefing endpoint
+app.post('/api/mobile/send-briefing', requireAuth, async (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email address is required' });
+  }
+
+  try {
+    // Generate and send briefing
+    const briefing = await newsIntelligence.generateDailyBriefing();
+    const result = await emailService.sendDailyBriefing(briefing, email);
+    
+    // Mobile-optimized response
+    res.json({
+      success: true,
+      message: `📧 Daily briefing sent to ${email}`,
+      summary: {
+        date: briefing.date,
+        priority: briefing.summary.priorityLevel,
+        articles: briefing.summary.totalArticles,
+        actionItems: briefing.actionItems?.length || 0
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error sending mobile briefing:', error);
+    res.status(500).json({ 
+      error: 'Failed to send briefing',
+      details: error.message 
+    });
+  }
 });
 
 // Initialize MCP connection on server start
