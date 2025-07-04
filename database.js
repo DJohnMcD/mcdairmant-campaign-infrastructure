@@ -238,14 +238,20 @@ class CampaignDatabase {
       
       `CREATE TABLE IF NOT EXISTS campaign_donors (
         id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
+        user_id INTEGER REFERENCES users(id),
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
         email TEXT,
         phone TEXT,
         address TEXT,
+        city TEXT,
+        state TEXT,
+        zip TEXT,
         employer TEXT,
         occupation TEXT,
-        total_contributions DECIMAL(10,2) DEFAULT 0,
-        last_contribution_date DATE,
+        contribution_amount DECIMAL(10,2),
+        contribution_date DATE,
+        contribution_type TEXT,
         compliance_status TEXT DEFAULT 'compliant',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
@@ -338,16 +344,23 @@ class CampaignDatabase {
       
       `CREATE TABLE IF NOT EXISTS campaign_donors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        user_id INTEGER,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
         email TEXT,
         phone TEXT,
         address TEXT,
+        city TEXT,
+        state TEXT,
+        zip TEXT,
         employer TEXT,
         occupation TEXT,
-        total_contributions DECIMAL(10,2) DEFAULT 0,
-        last_contribution_date DATE,
+        contribution_amount DECIMAL(10,2),
+        contribution_date DATE,
+        contribution_type TEXT,
         compliance_status TEXT DEFAULT 'compliant',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
       
       `CREATE TABLE IF NOT EXISTS campaign_voters (

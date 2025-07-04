@@ -871,26 +871,58 @@
             try {
                 // Load donor metrics
                 const donorsResponse = await fetch('/api/campaign/donors');
-                const donors = await donorsResponse.json();
-                
-                document.getElementById('totalDonors').textContent = donors.length;
-                
-                const totalRaised = donors.reduce((sum, donor) => sum + parseFloat(donor.contribution_amount || 0), 0);
-                document.getElementById('totalRaised').textContent = '$' + totalRaised.toLocaleString();
+                if (donorsResponse.ok) {
+                    const donors = await donorsResponse.json();
+                    
+                    if (Array.isArray(donors)) {
+                        document.getElementById('totalDonors').textContent = donors.length;
+                        const totalRaised = donors.reduce((sum, donor) => sum + parseFloat(donor.contribution_amount || 0), 0);
+                        document.getElementById('totalRaised').textContent = '$' + totalRaised.toLocaleString();
+                    } else {
+                        console.warn('Donors response is not an array:', donors);
+                        document.getElementById('totalDonors').textContent = '0';
+                        document.getElementById('totalRaised').textContent = '$0';
+                    }
+                } else {
+                    console.error('Failed to load donors:', donorsResponse.status);
+                    document.getElementById('totalDonors').textContent = '0';
+                    document.getElementById('totalRaised').textContent = '$0';
+                }
 
                 // Load expense metrics
                 const expensesResponse = await fetch('/api/expenses?classification=pending');
-                const pendingExpenses = await expensesResponse.json();
-                document.getElementById('pendingExpenses').textContent = pendingExpenses.length;
+                if (expensesResponse.ok) {
+                    const pendingExpenses = await expensesResponse.json();
+                    if (Array.isArray(pendingExpenses)) {
+                        document.getElementById('pendingExpenses').textContent = pendingExpenses.length;
+                    } else {
+                        document.getElementById('pendingExpenses').textContent = '0';
+                    }
+                } else {
+                    document.getElementById('pendingExpenses').textContent = '0';
+                }
 
                 // Load cash receipts
                 const receiptsResponse = await fetch('/api/receipts/cash?deposited=false');
-                const cashReceipts = await receiptsResponse.json();
-                const undepositedCash = cashReceipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount || 0), 0);
-                document.getElementById('cashReceipts').textContent = '$' + undepositedCash.toLocaleString();
+                if (receiptsResponse.ok) {
+                    const cashReceipts = await receiptsResponse.json();
+                    if (Array.isArray(cashReceipts)) {
+                        const undepositedCash = cashReceipts.reduce((sum, receipt) => sum + parseFloat(receipt.amount || 0), 0);
+                        document.getElementById('cashReceipts').textContent = '$' + undepositedCash.toLocaleString();
+                    } else {
+                        document.getElementById('cashReceipts').textContent = '$0';
+                    }
+                } else {
+                    document.getElementById('cashReceipts').textContent = '$0';
+                }
 
             } catch (error) {
                 console.error('Error loading dashboard metrics:', error);
+                // Set default values on error
+                document.getElementById('totalDonors').textContent = '0';
+                document.getElementById('totalRaised').textContent = '$0';
+                document.getElementById('pendingExpenses').textContent = '0';
+                document.getElementById('cashReceipts').textContent = '$0';
             }
         }
 
