@@ -250,6 +250,24 @@ class CampaignDatabase {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
       
+      `CREATE TABLE IF NOT EXISTS campaign_voters (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        city TEXT,
+        county TEXT,
+        zip TEXT,
+        party_affiliation TEXT,
+        support_level TEXT,
+        contact_method TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      
       `CREATE TABLE IF NOT EXISTS audit_log (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
@@ -330,6 +348,25 @@ class CampaignDatabase {
         last_contribution_date DATE,
         compliance_status TEXT DEFAULT 'compliant',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+      
+      `CREATE TABLE IF NOT EXISTS campaign_voters (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        city TEXT,
+        county TEXT,
+        zip TEXT,
+        party_affiliation TEXT,
+        support_level TEXT,
+        contact_method TEXT,
+        notes TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
       
       `CREATE TABLE IF NOT EXISTS audit_log (
