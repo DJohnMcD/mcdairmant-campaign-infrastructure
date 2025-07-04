@@ -241,6 +241,113 @@
             margin-bottom: 1rem;
         }
         
+        .form-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .voter-list {
+            margin-top: 1rem;
+        }
+        
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .voter-items {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .voter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .voter-info {
+            flex: 1;
+        }
+        
+        .voter-name {
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        .voter-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .support-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .support-strong {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .support-lean {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .support-undecided {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .support-oppose {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
         .form-label {
             display: block;
             margin-bottom: 0.5rem;
@@ -502,6 +609,124 @@
                         </span>
                     </li>
                 </ul>
+            </div>
+
+            <!-- Voter Management -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">🗳️ Voter Management</h2>
+                    <button class="card-action" onclick="toggleVoterForm()">Add Voter</button>
+                </div>
+                
+                <div id="voterForm" class="form-container" style="display: none;">
+                    <form id="addVoterForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="voterFirstName">First Name</label>
+                                <input type="text" id="voterFirstName" name="first_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="voterLastName">Last Name</label>
+                                <input type="text" id="voterLastName" name="last_name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="voterEmail">Email</label>
+                                <input type="email" id="voterEmail" name="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="voterPhone">Phone</label>
+                                <input type="tel" id="voterPhone" name="phone">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="voterAddress">Address</label>
+                            <input type="text" id="voterAddress" name="address">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="voterCity">City</label>
+                                <input type="text" id="voterCity" name="city">
+                            </div>
+                            <div class="form-group">
+                                <label for="voterCounty">County</label>
+                                <select id="voterCounty" name="county">
+                                    <option value="">Select County</option>
+                                    <option value="Oswego">Oswego</option>
+                                    <option value="Cayuga">Cayuga</option>
+                                    <option value="Onondaga">Onondaga</option>
+                                    <option value="Wayne">Wayne</option>
+                                    <option value="Seneca">Seneca</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="voterZip">ZIP Code</label>
+                                <input type="text" id="voterZip" name="zip">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="voterParty">Party Affiliation</label>
+                                <select id="voterParty" name="party_affiliation">
+                                    <option value="">Select Party</option>
+                                    <option value="Democrat">Democrat</option>
+                                    <option value="Republican">Republican</option>
+                                    <option value="Independent">Independent</option>
+                                    <option value="Conservative">Conservative</option>
+                                    <option value="Working Families">Working Families</option>
+                                    <option value="Green">Green</option>
+                                    <option value="Libertarian">Libertarian</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="voterSupport">Support Level</label>
+                                <select id="voterSupport" name="support_level">
+                                    <option value="">Select Support</option>
+                                    <option value="Strong Support">Strong Support</option>
+                                    <option value="Lean Support">Lean Support</option>
+                                    <option value="Undecided">Undecided</option>
+                                    <option value="Lean Oppose">Lean Oppose</option>
+                                    <option value="Strong Oppose">Strong Oppose</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="voterContact">Contact Method</label>
+                                <select id="voterContact" name="contact_method">
+                                    <option value="">Preferred Contact</option>
+                                    <option value="Phone">Phone</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Text">Text</option>
+                                    <option value="Mail">Mail</option>
+                                    <option value="Door">Door Knocking</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="voterNotes">Notes</label>
+                            <textarea id="voterNotes" name="notes" rows="3" placeholder="Conversation notes, issues of interest, etc."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Add Voter</button>
+                        <button type="button" class="btn btn-secondary" onclick="toggleVoterForm()">Cancel</button>
+                    </form>
+                </div>
+                
+                <div class="voter-list" id="voterList">
+                    <div class="list-header">
+                        <span>Recent Voter Contacts</span>
+                        <button class="btn btn-sm" onclick="loadVoters()">Refresh</button>
+                    </div>
+                    <div id="voterItems" class="voter-items">
+                        <!-- Voter items will be populated here -->
+                    </div>
+                </div>
             </div>
 
             <!-- AI Agents Quick Access -->
@@ -854,6 +1079,140 @@
                     modal.style.display = 'none';
                 }
             });
+        });
+
+        // Voter Management Functions
+        function toggleVoterForm() {
+            const form = document.getElementById('voterForm');
+            const isVisible = form.style.display !== 'none';
+            form.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible) {
+                // Clear form when showing
+                document.getElementById('addVoterForm').reset();
+            }
+        }
+
+        async function addVoter(formData) {
+            try {
+                const response = await fetch('/api/campaign/voters', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Voter added successfully!', 'success');
+                    document.getElementById('addVoterForm').reset();
+                    toggleVoterForm();
+                    loadVoters(); // Refresh the voter list
+                } else {
+                    showAlert(result.error || 'Failed to add voter', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding voter:', error);
+                showAlert('Failed to add voter', 'error');
+            }
+        }
+
+        async function loadVoters() {
+            try {
+                const response = await fetch('/api/campaign/voters');
+                const voters = await response.json();
+                
+                const voterItems = document.getElementById('voterItems');
+                if (voters.length === 0) {
+                    voterItems.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">No voters added yet. Add your first voter contact!</div>';
+                    return;
+                }
+                
+                voterItems.innerHTML = voters.slice(0, 10).map(voter => {
+                    const supportClass = getSupportClass(voter.support_level);
+                    return `
+                        <div class="voter-item">
+                            <div class="voter-info">
+                                <div class="voter-name">${voter.first_name} ${voter.last_name}</div>
+                                <div class="voter-details">
+                                    ${voter.city ? voter.city + ', ' : ''}${voter.county || ''} | 
+                                    ${voter.party_affiliation || 'No party'} | 
+                                    ${voter.contact_method || 'No preference'}
+                                </div>
+                                ${voter.notes ? `<div class="voter-details">${voter.notes}</div>` : ''}
+                            </div>
+                            <div class="support-badge ${supportClass}">
+                                ${voter.support_level || 'Unknown'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Update voter contacts metric
+                document.getElementById('voterContacts').textContent = voters.length;
+                
+            } catch (error) {
+                console.error('Error loading voters:', error);
+                document.getElementById('voterItems').innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load voters</div>';
+            }
+        }
+
+        function getSupportClass(supportLevel) {
+            if (!supportLevel) return 'support-undecided';
+            if (supportLevel.includes('Strong Support')) return 'support-strong';
+            if (supportLevel.includes('Lean Support')) return 'support-lean';
+            if (supportLevel.includes('Oppose')) return 'support-oppose';
+            return 'support-undecided';
+        }
+
+        function showAlert(message, type = 'info') {
+            // Create alert element
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                max-width: 400px;
+                background: ${type === 'success' ? '#dcfce7' : type === 'error' ? '#fee2e2' : '#f3f4f6'};
+                color: ${type === 'success' ? '#166534' : type === 'error' ? '#991b1b' : '#374151'};
+                border: 1px solid ${type === 'success' ? '#bbf7d0' : type === 'error' ? '#fecaca' : '#d1d5db'};
+            `;
+            alert.textContent = message;
+            
+            document.body.appendChild(alert);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 3000);
+        }
+
+        // Form submission handler
+        document.getElementById('addVoterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const voterData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                voterData[key] = value;
+            }
+            
+            addVoter(voterData);
+        });
+
+        // Load voters when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVoters();
         });
     </script>
 </body>

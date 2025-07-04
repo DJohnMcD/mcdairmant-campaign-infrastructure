@@ -1164,6 +1164,22 @@ app.get('/api/campaign/voters', requireAuth, async (req, res) => {
   }
 });
 
+// Add voter endpoint
+app.post('/api/campaign/voters', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  const voter = req.body;
+  
+  try {
+    const result = await db.query(
+      'INSERT INTO campaign_voters (user_id, first_name, last_name, email, phone, address, city, county, zip, party_affiliation, support_level, contact_method, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [userId, voter.first_name, voter.last_name, voter.email, voter.phone, voter.address, voter.city, voter.county, voter.zip, voter.party_affiliation, voter.support_level, voter.contact_method, voter.notes, new Date().toISOString()]);
+    res.json({ id: result.lastInsertRowid, message: 'Voter added successfully' });
+  } catch (err) {
+    console.error('Error adding voter:', err);
+    return res.status(500).json({ error: 'Failed to add voter' });
+  }
+});
+
 app.get('/api/campaign/events', requireAuth, async (req, res) => {
   const userId = req.session.userId;
   try {
