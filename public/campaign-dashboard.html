@@ -348,6 +348,81 @@
             color: #991b1b;
         }
         
+        .event-list {
+            margin-top: 1rem;
+        }
+        
+        .event-items {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .event-info {
+            flex: 1;
+        }
+        
+        .event-title {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+        
+        .event-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        
+        .event-meta {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .event-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .status-planning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-in_progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-completed {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
         .form-label {
             display: block;
             margin-bottom: 0.5rem;
@@ -725,6 +800,141 @@
                     </div>
                     <div id="voterItems" class="voter-items">
                         <!-- Voter items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Management -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">📅 Event Management</h2>
+                    <button class="card-action" onclick="toggleEventForm()">Add Event</button>
+                </div>
+                
+                <div id="eventForm" class="form-container" style="display: none;">
+                    <form id="addEventForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="eventTitle">Event Title</label>
+                                <input type="text" id="eventTitle" name="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="eventType">Event Type</label>
+                                <select id="eventType" name="event_type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Rally">Rally</option>
+                                    <option value="Town Hall">Town Hall</option>
+                                    <option value="Fundraiser">Fundraiser</option>
+                                    <option value="Volunteer Training">Volunteer Training</option>
+                                    <option value="Canvassing">Canvassing</option>
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eventDescription">Description</label>
+                            <textarea id="eventDescription" name="description" rows="2" placeholder="Event description and goals"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="eventLocation">Location Name</label>
+                                <input type="text" id="eventLocation" name="location" placeholder="Venue or location name">
+                            </div>
+                            <div class="form-group">
+                                <label for="eventCounty">County</label>
+                                <select id="eventCounty" name="county">
+                                    <option value="">Select County</option>
+                                    <option value="Oswego">Oswego</option>
+                                    <option value="Cayuga">Cayuga</option>
+                                    <option value="Onondaga">Onondaga</option>
+                                    <option value="Wayne">Wayne</option>
+                                    <option value="Seneca">Seneca</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eventAddress">Address</label>
+                            <input type="text" id="eventAddress" name="address" placeholder="Full address with city and ZIP">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="eventDate">Date</label>
+                                <input type="date" id="eventDate" name="event_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="eventStartTime">Start Time</label>
+                                <input type="time" id="eventStartTime" name="start_time">
+                            </div>
+                            <div class="form-group">
+                                <label for="eventEndTime">End Time</label>
+                                <input type="time" id="eventEndTime" name="end_time">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expectedAttendance">Expected Attendance</label>
+                                <input type="number" id="expectedAttendance" name="expected_attendance" min="0" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="eventBudget">Budget</label>
+                                <input type="number" id="eventBudget" name="budget" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="requiredVolunteers">Volunteers Needed</label>
+                                <input type="number" id="requiredVolunteers" name="required_volunteers" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="volunteerCoordinator">Volunteer Coordinator</label>
+                                <input type="text" id="volunteerCoordinator" name="volunteer_coordinator" placeholder="Coordinator name">
+                            </div>
+                            <div class="form-group">
+                                <label for="eventStatus">Status</label>
+                                <select id="eventStatus" name="status">
+                                    <option value="planning">Planning</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="setupRequirements">Setup Requirements</label>
+                            <textarea id="setupRequirements" name="setup_requirements" rows="2" placeholder="Setup and preparation requirements"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="equipmentNeeded">Equipment Needed</label>
+                            <textarea id="equipmentNeeded" name="equipment_needed" rows="2" placeholder="Sound system, tables, chairs, etc."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eventNotes">Notes</label>
+                            <textarea id="eventNotes" name="notes" rows="3" placeholder="Additional notes and considerations"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Create Event</button>
+                        <button type="button" class="btn btn-secondary" onclick="toggleEventForm()">Cancel</button>
+                    </form>
+                </div>
+                
+                <div class="event-list" id="eventList">
+                    <div class="list-header">
+                        <span>Upcoming Events</span>
+                        <button class="btn btn-sm" onclick="loadEvents()">Refresh</button>
+                    </div>
+                    <div id="eventItems" class="event-items">
+                        <!-- Event items will be populated here -->
                     </div>
                 </div>
             </div>
@@ -1241,7 +1451,111 @@
             }, 3000);
         }
 
-        // Form submission handler
+        // Event Management Functions
+        function toggleEventForm() {
+            const form = document.getElementById('eventForm');
+            const isVisible = form.style.display !== 'none';
+            form.style.display = isVisible ? 'none' : 'block';
+            
+            if (!isVisible) {
+                // Clear form and set default date
+                document.getElementById('addEventForm').reset();
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('eventDate').value = today;
+            }
+        }
+
+        async function addEvent(formData) {
+            try {
+                console.log('Adding event with data:', formData);
+                
+                const response = await fetch('/api/campaign/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                console.log('Event response status:', response.status);
+                const result = await response.json();
+                console.log('Event response data:', result);
+                
+                if (response.ok) {
+                    showAlert('Event created successfully!', 'success');
+                    document.getElementById('addEventForm').reset();
+                    toggleEventForm();
+                    loadEvents(); // Refresh the event list
+                } else {
+                    console.error('Server error:', result);
+                    showAlert(`Failed to create event: ${result.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Network/Parse error adding event:', error);
+                showAlert(`Failed to create event: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                console.log('Loading events...');
+                const response = await fetch('/api/campaign/events');
+                console.log('Events response status:', response.status);
+                
+                if (response.ok) {
+                    const events = await response.json();
+                    console.log('Events data:', events);
+                    
+                    const eventItems = document.getElementById('eventItems');
+                    if (events.length === 0) {
+                        eventItems.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">No events scheduled yet. Create your first campaign event!</div>';
+                        return;
+                    }
+                    
+                    eventItems.innerHTML = events.slice(0, 10).map(event => {
+                        const statusClass = getEventStatusClass(event.status);
+                        const eventDate = new Date(event.event_date).toLocaleDateString();
+                        const timeRange = event.start_time && event.end_time ? 
+                            `${event.start_time} - ${event.end_time}` : 
+                            event.start_time || 'Time TBD';
+                        
+                        return `
+                            <div class="event-item">
+                                <div class="event-info">
+                                    <div class="event-title">${event.title}</div>
+                                    <div class="event-details">
+                                        📅 ${eventDate} | ⏰ ${timeRange}
+                                        ${event.location ? ` | 📍 ${event.location}` : ''}
+                                        ${event.county ? ` (${event.county} County)` : ''}
+                                    </div>
+                                    <div class="event-meta">
+                                        ${event.event_type} | Expected: ${event.expected_attendance || 0} people
+                                        ${event.required_volunteers ? ` | Volunteers needed: ${event.required_volunteers}` : ''}
+                                    </div>
+                                </div>
+                                <div class="event-status ${statusClass}">
+                                    ${event.status || 'planning'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    console.error('Failed to load events:', response.status);
+                    document.getElementById('eventItems').innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load events</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading events:', error);
+                document.getElementById('eventItems').innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load events</div>';
+            }
+        }
+
+        function getEventStatusClass(status) {
+            if (!status) return 'status-planning';
+            return `status-${status.toLowerCase().replace(' ', '_')}`;
+        }
+
+        // Form submission handlers
         document.getElementById('addVoterForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -1255,9 +1569,23 @@
             addVoter(voterData);
         });
 
-        // Load voters when page loads
+        document.getElementById('addEventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const eventData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                eventData[key] = value;
+            }
+            
+            addEvent(eventData);
+        });
+
+        // Load data when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadVoters();
+            loadEvents();
         });
     </script>
 </body>

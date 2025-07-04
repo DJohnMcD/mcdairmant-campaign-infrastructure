@@ -1194,6 +1194,83 @@ app.get('/api/campaign/events', requireAuth, async (req, res) => {
   }
 });
 
+// Add new event
+app.post('/api/campaign/events', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  const event = req.body;
+  
+  try {
+    const result = await db.query(
+      'INSERT INTO campaign_events (user_id, title, event_type, description, location, address, city, county, event_date, start_time, end_time, expected_attendance, budget, volunteer_coordinator, required_volunteers, setup_requirements, equipment_needed, status, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [userId, event.title, event.event_type, event.description, event.location, event.address, event.city, event.county, event.event_date, event.start_time, event.end_time, event.expected_attendance || 0, event.budget || 0, event.volunteer_coordinator, event.required_volunteers || 0, event.setup_requirements, event.equipment_needed, event.status || 'planning', event.notes, new Date().toISOString()]);
+    res.json({ id: result.lastInsertRowid, message: 'Event created successfully' });
+  } catch (err) {
+    console.error('Error creating event:', err);
+    return res.status(500).json({ error: 'Failed to create event' });
+  }
+});
+
+// Update event
+app.put('/api/campaign/events/:id', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  const eventId = req.params.id;
+  const event = req.body;
+  
+  try {
+    const result = await db.query(
+      'UPDATE campaign_events SET title = ?, event_type = ?, description = ?, location = ?, address = ?, city = ?, county = ?, event_date = ?, start_time = ?, end_time = ?, expected_attendance = ?, actual_attendance = ?, budget = ?, expenses = ?, volunteer_coordinator = ?, required_volunteers = ?, confirmed_volunteers = ?, setup_requirements = ?, equipment_needed = ?, status = ?, notes = ? WHERE id = ? AND user_id = ?',
+      [event.title, event.event_type, event.description, event.location, event.address, event.city, event.county, event.event_date, event.start_time, event.end_time, event.expected_attendance, event.actual_attendance, event.budget, event.expenses, event.volunteer_coordinator, event.required_volunteers, event.confirmed_volunteers, event.setup_requirements, event.equipment_needed, event.status, event.notes, eventId, userId]);
+    
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.json({ message: 'Event updated successfully' });
+  } catch (err) {
+    console.error('Error updating event:', err);
+    return res.status(500).json({ error: 'Failed to update event' });
+  }
+});
+
+// Delete event
+app.delete('/api/campaign/events/:id', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  const eventId = req.params.id;
+  
+  try {
+    const result = await db.query(
+      'DELETE FROM campaign_events WHERE id = ? AND user_id = ?',
+      [eventId, userId]);
+    
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.json({ message: 'Event deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting event:', err);
+    return res.status(500).json({ error: 'Failed to delete event' });
+  }
+});
+
+// Get single event
+app.get('/api/campaign/events/:id', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  const eventId = req.params.id;
+  
+  try {
+    const events = await db.query(
+      'SELECT * FROM campaign_events WHERE id = ? AND user_id = ?',
+      [eventId, userId]);
+    
+    if (events.length === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.json(events[0]);
+  } catch (err) {
+    console.error('Error fetching event:', err);
+    return res.status(500).json({ error: 'Failed to fetch event' });
+  }
+});
+
 // Configure multer for file uploads
 const upload = multer({
   dest: 'uploads/',

@@ -16,7 +16,9 @@
       "Bash(timeout 10s npm start)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
