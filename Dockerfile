@@ -1,4 +1,4 @@
-# Campaign Infrastructure Docker Configuration  
+# NY-24 Campaign Infrastructure Docker Configuration  
 FROM node:20-alpine
 
 # Install build tools for native module compilation

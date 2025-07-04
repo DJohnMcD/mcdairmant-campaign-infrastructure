@@ -1,0 +1,47 @@
+{
+  "name": "NY-24 Campaign Infrastructure",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.live-server",
+        "ms-vscode.vscode-node-debug2"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        }
+      }
+    }
+  },
+  "forwardPorts": [8080, 3000],
+  "portsAttributes": {
+    "8080": {
+      "label": "Campaign Server",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Development Server", 
+      "onAutoForward": "ignore"
+    }
+  },
+  "postCreateCommand": "npm install && npm install better-sqlite3",
+  "postStartCommand": "echo 'NY-24 Campaign Infrastructure Ready! 🚀' && echo 'Run: npm start (campaign server) or npm run dev (development mode)'",
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.env,target=/workspaces/calendar-bridge/.env,type=bind,consistency=cached"
+  ]
+}

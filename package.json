@@ -1,11 +1,17 @@
 {
-  "name": "personal-ai-assistant",
+  "name": "ny24-campaign-infrastructure",
   "version": "1.0.0",
-  "description": "Personal AI system supporting productivity and human flourishing",
+  "description": "AI-powered campaign management system for NY-24 Congressional race - McDairmant for Congress 2026",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "cloud-setup": "./start-codespaces.sh",
+    "test": "echo 'Campaign test suite coming soon!' && exit 0",
+    "test-mcp": "node test-mcp.js",
+    "test-db": "node test-database.js",
+    "test-all": "npm run test-mcp && npm run test-db",
+    "campaign-status": "node -e 'console.log(\"🎯 NY-24 Campaign Infrastructure Status:\"); console.log(\"📍 Environment:\", process.env.NODE_ENV || \"development\"); console.log(\"🌐 Port:\", process.env.PORT || 8080); console.log(\"🗄️  Database:\", process.env.DATABASE_URL ? \"PostgreSQL (Production)\" : \"SQLite (Development)\");'"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.2",
@@ -17,6 +23,7 @@
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "express-session": "^1.17.3",
+    "googleapis": "^150.0.1",
     "helmet": "^7.1.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^7.0.4",
@@ -29,9 +36,14 @@
     "better-sqlite3": "^8.7.0"
   },
   "keywords": [
-    "ai",
-    "productivity",
-    "personal-assistant"
+    "campaign-management",
+    "ny24",
+    "congressional-campaign",
+    "ai-agents",
+    "fec-compliance",
+    "voter-lookup",
+    "mobile-canvassing",
+    "mcdairmant-for-congress"
   ],
   "author": "David McDairmant",
   "license": "MIT"

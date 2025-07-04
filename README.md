@@ -1,6 +1,6 @@
-# McDairmant for Congress - Campaign Infrastructure
+# NY-24 Campaign Infrastructure
 
-**AI-Powered Campaign Management System for NY-24 Congressional Race 2026**
+**AI-Powered Campaign Management System - McDairmant for Congress 2026**
 
 This is a comprehensive campaign management platform featuring AI agents, expense tracking, FEC compliance automation, and daily intelligence briefing systems.
 

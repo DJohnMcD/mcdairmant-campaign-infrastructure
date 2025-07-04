@@ -1,0 +1,49 @@
+{
+  "name": "NY-24 Campaign Infrastructure - Codespaces",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss", 
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.live-server",
+        "GitLab.gitlab-workflow",
+        "GitHub.vscode-pull-request-github"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        },
+        "workbench.colorTheme": "Default Dark+",
+        "editor.fontSize": 14,
+        "terminal.integrated.fontSize": 14
+      }
+    }
+  },
+  "forwardPorts": [8080, 3000],
+  "portsAttributes": {
+    "8080": {
+      "label": "Campaign Server",
+      "onAutoForward": "openPreview",
+      "visibility": "public"
+    },
+    "3000": {
+      "label": "Development Server", 
+      "onAutoForward": "ignore"
+    }
+  },
+  "postCreateCommand": "npm install && npm install better-sqlite3 && echo '🎯 Campaign Infrastructure Deployed in Cloud! 🎯'",
+  "postStartCommand": "echo '🚀 Ready for mobile development! Access from any device via browser.'",
+  "remoteUser": "node"
+}

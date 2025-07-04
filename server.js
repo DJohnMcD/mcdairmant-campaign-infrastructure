@@ -12,6 +12,7 @@ const MCPStructuredThinkingClient = require('./mcp-client');
 const PrivacyFilter = require('./privacy-filter');
 const { NY24_DISTRICT_DATA, MONITORING_TARGETS, NY24_HELPERS } = require('./ny24-district-data');
 const CampaignNewsIntelligence = require('./news-intelligence');
+const GoogleDocsService = require('./google-docs-service');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -80,6 +81,7 @@ app.use('/api/auth/', authLimiter);
 const mcpClient = new MCPStructuredThinkingClient();
 const privacyFilter = new PrivacyFilter();
 const newsIntelligence = new CampaignNewsIntelligence();
+const googleDocsService = new GoogleDocsService();
 const EmailService = require('./email-service');
 const emailService = new EmailService();
 let mcpConnected = false;
@@ -2644,6 +2646,183 @@ app.post('/api/mobile/send-briefing', requireAuth, async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to send briefing',
       details: error.message 
+    });
+  }
+});
+
+// Google Docs API endpoints
+app.get('/api/google-docs/auth-url', requireAuth, (req, res) => {
+  try {
+    if (!googleDocsService.auth) {
+      // Initialize OAuth client first
+      googleDocsService.authenticate().catch(() => {}); // Silent fail for missing credentials
+    }
+    
+    const authUrl = googleDocsService.generateAuthUrl();
+    res.json({ authUrl });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to generate auth URL', 
+      details: error.message,
+      setup: 'Please ensure google-credentials.json is configured'
+    });
+  }
+});
+
+app.post('/api/google-docs/auth-callback', requireAuth, async (req, res) => {
+  try {
+    const { code } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ error: 'Authorization code required' });
+    }
+
+    const success = await googleDocsService.saveAuthToken(code);
+    
+    if (success) {
+      res.json({ message: 'Authentication successful', authenticated: true });
+    } else {
+      res.status(400).json({ error: 'Failed to save authentication token' });
+    }
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Authentication failed', 
+      details: error.message 
+    });
+  }
+});
+
+app.get('/api/google-docs/document/:documentId', requireAuth, async (req, res) => {
+  try {
+    const { documentId } = req.params;
+    const document = await googleDocsService.readDocument(documentId);
+    
+    res.json({
+      success: true,
+      document: {
+        title: document.title,
+        content: document.content,
+        documentId: document.documentId,
+        revisionId: document.revisionId,
+        extracted_at: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to read document', 
+      details: error.message 
+    });
+  }
+});
+
+app.post('/api/google-docs/read-url', requireAuth, async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'Google Docs URL required' });
+    }
+
+    const documentId = googleDocsService.extractDocumentIdFromUrl(url);
+    
+    if (!documentId) {
+      return res.status(400).json({ error: 'Invalid Google Docs URL format' });
+    }
+
+    const document = await googleDocsService.readDocument(documentId);
+    
+    res.json({
+      success: true,
+      document: {
+        title: document.title,
+        content: document.content,
+        documentId: document.documentId,
+        revisionId: document.revisionId,
+        source_url: url,
+        extracted_at: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to read document from URL', 
+      details: error.message 
+    });
+  }
+});
+
+app.get('/api/google-docs/list', requireAuth, async (req, res) => {
+  try {
+    const { folderId } = req.query;
+    const documents = await googleDocsService.listDocuments(folderId);
+    
+    res.json({
+      success: true,
+      documents: documents.map(doc => ({
+        id: doc.id,
+        name: doc.name,
+        modifiedTime: doc.modifiedTime,
+        webViewLink: doc.webViewLink
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to list documents', 
+      details: error.message 
+    });
+  }
+});
+
+app.post('/api/google-docs/search', requireAuth, async (req, res) => {
+  try {
+    const { searchTerm } = req.body;
+    
+    if (!searchTerm) {
+      return res.status(400).json({ error: 'Search term required' });
+    }
+
+    const documents = await googleDocsService.searchDocuments(searchTerm);
+    
+    res.json({
+      success: true,
+      searchTerm,
+      documents: documents.map(doc => ({
+        id: doc.id,
+        name: doc.name,
+        modifiedTime: doc.modifiedTime,
+        webViewLink: doc.webViewLink
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to search documents', 
+      details: error.message 
+    });
+  }
+});
+
+app.get('/api/google-docs/status', requireAuth, async (req, res) => {
+  try {
+    const authenticated = await googleDocsService.authenticate();
+    
+    res.json({
+      authenticated,
+      credentialsConfigured: fs.existsSync(googleDocsService.credentialsPath),
+      tokenExists: fs.existsSync(googleDocsService.tokenPath),
+      setup_instructions: authenticated ? null : {
+        step1: 'Create Google Cloud Console project',
+        step2: 'Enable Google Docs API and Google Drive API',
+        step3: 'Create OAuth 2.0 credentials (Web application)',
+        step4: 'Download credentials as google-credentials.json',
+        step5: 'Use /api/google-docs/auth-url to get authorization URL',
+        step6: 'Complete OAuth flow with /api/google-docs/auth-callback'
+      }
+    });
+  } catch (error) {
+    res.json({
+      authenticated: false,
+      error: error.message,
+      credentialsConfigured: fs.existsSync(googleDocsService.credentialsPath),
+      tokenExists: fs.existsSync(googleDocsService.tokenPath)
     });
   }
 });

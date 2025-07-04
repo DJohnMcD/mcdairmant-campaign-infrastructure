@@ -57,6 +57,13 @@ class CampaignDatabase {
       this.db.pragma('foreign_keys = ON');
       this.isPostgres = false;
       console.log('✅ SQLite connection initialized');
+      
+      // Log cloud development environment
+      if (process.env.CODESPACES) {
+        console.log('☁️ GitHub Codespaces detected - Mobile development ready!');
+      } else if (process.env.GITPOD_WORKSPACE_ID) {
+        console.log('☁️ Gitpod workspace detected - Cloud development active!');
+      }
     } catch (error) {
       console.error('❌ SQLite initialization failed:', error.message);
       if (process.env.NODE_ENV === 'production') {

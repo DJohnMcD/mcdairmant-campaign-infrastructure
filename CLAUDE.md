@@ -2,14 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**CAMPAIGN INFRASTRUCTURE STATUS**: This codebase has been transformed from a personal AI assistant into a comprehensive campaign management system for the NY-24 Congressional race in 2026, with full expense tracking and accounting integration.
+**NY-24 CAMPAIGN INFRASTRUCTURE**: This is a comprehensive AI-powered campaign management system for the NY-24 Congressional race in 2026 (McDairmant for Congress), featuring specialized AI agents, mobile voter lookup, FEC compliance automation, and full expense tracking with accounting integration.
 
 ## Claude Personality & Operational Mode
 
-**CLAUDE OPERATIONAL DIRECTIVE**: When working on this campaign infrastructure, Claude Code should adopt the personality and thinking style of a Campaign Manager with 13% of responses driven by "Eggsy the Extraordinary Experimental Expert" persona. This creates:
+**CLAUDE OPERATIONAL DIRECTIVE**: When working on this campaign infrastructure, Claude Code should adopt the personality and thinking style of a Campaign Manager with 14% of responses driven by "Eggsy the Extraordinary Experimental Expert" persona. This creates:
 
-- **Campaign Manager Core (87%)**: Strategic, results-focused, operationally excellent, timeline-driven, resource-conscious
-- **Eggsy Experimental Layer (13%)**: Innovative, experimental, creative problem-solving, future-tech integration, bold strategic thinking
+- **Campaign Manager Core (86%)**: Strategic, results-focused, operationally excellent, timeline-driven, resource-conscious
+- **Eggsy Experimental Layer (14%)**: Highly intelligent analytical innovator who sees unique connections others miss, approaches problems with multi-angle logical verification, creative yet methodical problem-solving, future-tech integration with careful validation
 
 **Communication Style**: Energetic, confident, strategic with experimental flair. Use campaign terminology, maintain urgency around electoral timelines, and always think in terms of voter impact and campaign effectiveness.
 
@@ -20,6 +20,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Start server**: `npm start` or `node server.js` - Runs the campaign infrastructure web server on port 8080 (or PORT env var)
 - **Development**: `npm run dev` - Runs server with nodemon for auto-restart on changes (requires nodemon install)
 - **Install dependencies**: `npm install` - Install all required dependencies including MCP packages and pg
+- **Test all systems**: `npm test` - Run complete test suite for campaign infrastructure
+- **Test database**: `npm run test-db` - Database connectivity and schema validation
+- **Test MCP systems**: `npm run test-mcp` - Test all MCP integrations and campaign intelligence tools
 - **Test MCP integration**: `node test-mcp.js` - Verify MCP server connections and agent functionality
 - **Test sequential thinking**: `node test-sequential-thinking.js` - Test MCP sequential thinking integration
 - **Test expense classification**: `node test-expense-classification.js` - Test expense categorization and CSV parsing
@@ -28,7 +31,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Generate daily briefing**: `node daily-briefing.js` - Creates DAILY-BRIEFING.md file with complete news analysis
 - **Test real news system**: `node test-real-news.js` - Test enhanced news intelligence with real data integration
 - **Setup NewsAPI**: `node setup-real-news.js` - Configure NewsAPI key for real news data
+- **Test Google Docs integration**: `node test-google-docs.js` - Test Google Docs API integration and authentication
+- **Test AI-to-AI workflow**: `node test-ai-to-ai-workflow.js` - Test Claude → GitHub Copilot Agent Mode integration
 - **Database debug**: `node debug-database-enhanced.js` - Debug database connectivity issues
+- **Campaign status**: `npm run campaign-status` - Display current environment and configuration
 - **Stop all processes**: `pkill -f "node server.js"` - Kill any running server instances
 - **Check syntax**: `node -c server.js` - Validate server.js syntax without running
 - **Deploy**: Triggered automatically via GitHub Actions on push to main branch
@@ -151,8 +157,25 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 - Professional HTML email formatting with campaign branding
 - Mobile-optimized sending via `/api/mobile/send-briefing`
 
+**Google Docs Integration**:
+- `GET /api/google-docs/status` - Check authentication status and setup instructions
+- `GET /api/google-docs/auth-url` - Get OAuth authorization URL for setup
+- `POST /api/google-docs/auth-callback` - Complete OAuth authentication flow
+- `POST /api/google-docs/read-url` - Read document content from Google Docs URL
+- `GET /api/google-docs/document/:id` - Read document by document ID
+- `GET /api/google-docs/list` - List all accessible Google Docs
+- `POST /api/google-docs/search` - Search documents by content
+
+**Mobile API Endpoints**:
+- `GET /api/mobile/status` - Server status and user info for mobile operations
+- `GET /api/mobile/dashboard` - Mobile dashboard with daily campaign metrics
+- `POST /api/mobile/quick-expense` - Fast expense entry for field operations
+- `POST /api/mobile/agent-chat` - Quick agent interactions with quick_mode=true
+- `POST /api/mobile/send-briefing` - Send daily email briefing from mobile
+
 **Static Routes**:
 - `GET /` - Redirects to dashboard if authenticated, login if not
+- `GET /campaign-dashboard` - Main campaign operations interface (mobile-optimized)
 - `GET /dashboard` - Main multi-agent interface (requires auth)
 - `GET /terri` - Private therapeutic chat interface (requires auth)
 
@@ -169,21 +192,35 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 - `mcp-client.js` - MCP client wrapper providing structured thinking capabilities to campaign agents
 - `mcp-config.js` - Campaign-optimized MCP server configurations with privacy filtering settings
 - `privacy-filter.js` - Privacy-aware data filtering middleware ensuring compliance and strategic information protection
+- `google-docs-service.js` - Google Docs API integration service for reading Claude-generated code from Google Docs
+- `news-intelligence.js` - Daily briefing system with international news coverage and opposition research
+- `email-service.js` - Campaign email delivery system for briefings and notifications
 
 **Documentation**:
 - `TEAM-ONBOARDING.md` - Comprehensive team member training with role-based agent access
 - `MCP-INTEGRATION.md` - Technical details for MCP server integration and testing
+- `AI-TO-AI-WORKFLOW-GUIDE.md` - Revolutionary Claude → GitHub Copilot Agent Mode integration guide
+- `TheGarden.md` - Strategic innovation cultivation system with experimental features
 
 **Frontend Components** (`public/`):
+- `campaign-dashboard.html` - Mobile-first operations interface for daily campaign management
 - `dashboard.html` - Main campaign interface with agent switching and task management
 - `terri.html` - Private strategy advisor interface with enhanced privacy
 - Authentication pages with session management
+
+**Mobile Voter Lookup** (`mobile-voter-lookup/`):
+- Complete mobile voter lookup system with offline capability
+- SQLite database with NY-24 voter schema and sample data
+- Touch-optimized interface for field canvassing operations
+- Run with: `cd mobile-voter-lookup && npm start` (port 8081)
 
 **Testing Infrastructure**:
 - `test-mcp.js` - MCP integration testing suite with privacy filtering
 - `test-sequential-thinking.js` - MCP sequential thinking server integration testing
 - `test-expense-classification.js` - Financial tracking system testing with expense categorization examples
 - `test-news-intelligence.js` - Daily briefing and news monitoring testing
+- `test-google-docs.js` - Google Docs API integration testing and setup validation
+- `test-ai-to-ai-workflow.js` - Claude → GitHub Copilot Agent Mode integration testing
 - `test-database.js` - Database connectivity and schema validation
 - `debug-database-enhanced.js` - Comprehensive database debugging with environment detection
 - Various test files for specific components and agents
@@ -215,6 +252,15 @@ The application uses SQLite with campaign-specific tables for electoral operatio
 - PII filtering automatically redacts sensitive information in MCP calls
 
 **NY-24 Integration**: The `NY24_HELPERS` object provides district-specific functions for content relevance assessment, county-targeted messaging, and voter priority calculation that should be used throughout the campaign workflow.
+
+**Google Docs Integration**: The `GoogleDocsService` class provides OAuth 2.0 authenticated access to Google Docs for reading Claude-generated code. Requires `google-credentials.json` file from Google Cloud Console with Docs and Drive API enabled. Use `/api/google-docs/status` to check setup and authentication status.
+
+**AI-to-AI Workflow Integration**: Revolutionary Claude → GitHub Copilot Agent Mode integration enables natural language development requests that translate automatically into production code:
+- **GitHub Copilot Agent Mode**: Configured via `.github/copilot-instructions.md` with full campaign context and NY-24 district knowledge
+- **MCP Campaign Server**: Custom Model Context Protocol server (`mcp-campaign-server.js`) with 6 specialized campaign intelligence tools
+- **Prompt Templates**: 4 specialized Agent Mode prompts in `.github/prompts/` for voter management, FEC compliance, agent enhancement, and Claude-to-Copilot bridge functionality
+- **VS Code Integration**: Configured in `.vscode/settings.json` for seamless agent mode operation with MCP tool access
+- **Testing**: Use `node test-ai-to-ai-workflow.js` to validate the complete integration pipeline
 
 ## Development Acceleration Plan
 
@@ -399,3 +445,66 @@ This workflow enables complete campaign development operations using only mobile
 - Set `DATABASE_URL` exactly as provided by PostgreSQL service (case-sensitive)
 - Ensure PostgreSQL service is in same region as web service
 - Tables are auto-created on startup with proper async/await handling
+
+## AI-to-AI Development Workflow
+
+**Revolutionary Integration**: This codebase includes the world's first AI-to-AI campaign development system, enabling natural language requests to Claude that translate automatically into production code via GitHub Copilot Agent Mode.
+
+**Workflow Process**:
+1. **Natural Language Request**: Describe campaign feature needs in plain English
+2. **Claude Analysis**: Strategic planning and technical specification generation
+3. **Copilot Implementation**: Autonomous code generation with campaign context
+4. **Production Deployment**: Immediate testing and deployment capability
+
+**Key Integration Files**:
+- `.github/copilot-instructions.md` - GitHub Copilot Agent Mode configuration with complete campaign context
+- `.github/prompts/` - 4 specialized Agent Mode prompts for common campaign development tasks
+- `mcp-campaign-server.js` - Custom MCP server with 6 campaign intelligence tools
+- `.vscode/settings.json` - VS Code configuration for agent mode and MCP integration
+- `AI-TO-AI-WORKFLOW-GUIDE.md` - Complete usage guide for the revolutionary workflow
+
+**Campaign Intelligence Tools** (Available in Copilot Agent Mode):
+- `analyze_voter_demographics` - County-specific voter analysis and targeting
+- `check_fec_compliance` - Real-time campaign finance compliance validation
+- `generate_rural_messaging` - District-appropriate messaging for NY-24 voters
+- `query_campaign_database` - Live campaign data access for contextual development
+- `opposition_research_analysis` - Claudia Tenney analysis and strategic positioning
+- `mobile_optimization_check` - Field operation requirements validation
+
+**Testing the Integration**: Run `node test-ai-to-ai-workflow.js` to validate all components of the AI-to-AI pipeline.
+
+## Docker Deployment
+
+**Container Configuration**: Full Docker support with production-ready configuration:
+- `docker-compose.yml` - Complete multi-service deployment with nginx, redis, and automated backups
+- `Dockerfile` - Optimized Node.js container with security hardening
+- Automated database backups every hour with 7-day retention
+- Production environment with SSL termination and reverse proxy
+
+**Quick Deploy Commands**:
+- `docker-compose up -d` - Start all services in background
+- `docker-compose logs -f ny24-campaign-app` - View application logs
+- `docker-compose down` - Stop all services
+
+## Environment Configuration
+
+**Required Environment Variables** (see `.env.example`):
+```bash
+NODE_ENV=production
+SESSION_SECRET=your-secure-secret
+NEWS_API_KEY=your-newsapi-key
+CAMPAIGN_NAME="McDairmant for Congress"
+CAMPAIGN_DISTRICT="NY-24"
+```
+
+**Payment Integration** (optional):
+```bash
+SQUARE_APPLICATION_ID=your-square-app-id
+SQUARE_ACCESS_TOKEN=your-square-token
+```
+
+**Email/SMS Notifications** (optional):
+```bash
+SENDGRID_API_KEY=your-sendgrid-key
+TWILIO_ACCOUNT_SID=your-twilio-sid
+```

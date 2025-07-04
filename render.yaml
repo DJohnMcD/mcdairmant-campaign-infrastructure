@@ -1,0 +1,36 @@
+# Render.com Deployment Configuration
+# Deploy by connecting GitHub repository to Render
+
+services:
+  - type: web
+    name: campaign-infrastructure
+    env: node
+    plan: starter  # Upgrade to standard for production
+    buildCommand: npm ci --only=production
+    startCommand: npm start
+    healthCheckPath: /api/health
+    
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        fromDatabase:
+          name: campaign-postgres
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CAMPAIGN_NAME
+        value: "NY-24 Congressional Campaign 2026"
+      - key: CAMPAIGN_DISTRICT
+        value: "NY-24"
+
+databases:
+  - name: campaign-postgres
+    databaseName: campaign_infrastructure
+    user: campaign_user
+    plan: starter  # Upgrade to standard for production
+
+  - name: campaign-redis
+    plan: starter  # For session storage and caching
