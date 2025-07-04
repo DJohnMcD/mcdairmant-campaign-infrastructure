@@ -1095,6 +1095,8 @@
 
         async function addVoter(formData) {
             try {
+                console.log('Adding voter with data:', formData);
+                
                 const response = await fetch('/api/campaign/voters', {
                     method: 'POST',
                     headers: {
@@ -1103,7 +1105,11 @@
                     body: JSON.stringify(formData)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
                 const result = await response.json();
+                console.log('Response data:', result);
                 
                 if (response.ok) {
                     showAlert('Voter added successfully!', 'success');
@@ -1111,22 +1117,28 @@
                     toggleVoterForm();
                     loadVoters(); // Refresh the voter list
                 } else {
-                    showAlert(result.error || 'Failed to add voter', 'error');
+                    console.error('Server error:', result);
+                    showAlert(`Failed to add voter: ${result.error || 'Unknown error'}`, 'error');
                 }
             } catch (error) {
-                console.error('Error adding voter:', error);
-                showAlert('Failed to add voter', 'error');
+                console.error('Network/Parse error adding voter:', error);
+                showAlert(`Failed to add voter: ${error.message}`, 'error');
             }
         }
 
         async function loadVoters() {
             try {
+                console.log('Loading voters...');
                 const response = await fetch('/api/campaign/voters');
+                console.log('Voters response status:', response.status);
+                
                 const voters = await response.json();
+                console.log('Voters data:', voters);
                 
                 const voterItems = document.getElementById('voterItems');
                 if (voters.length === 0) {
                     voterItems.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">No voters added yet. Add your first voter contact!</div>';
+                    document.getElementById('voterContacts').textContent = '0';
                     return;
                 }
                 
@@ -1152,6 +1164,7 @@
                 
                 // Update voter contacts metric
                 document.getElementById('voterContacts').textContent = voters.length;
+                console.log('Updated voter count to:', voters.length);
                 
             } catch (error) {
                 console.error('Error loading voters:', error);

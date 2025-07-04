@@ -120,7 +120,7 @@ function requireAuth(req, res, next) {
 // Routes
 app.get('/', (req, res) => {
   if (req.session.userId) {
-    res.redirect('/donor-form');
+    res.redirect('/campaign-dashboard');
   } else {
     res.redirect('/login');
   }
@@ -206,7 +206,7 @@ app.post('/login', async (req, res) => {
     
     if (user && await bcrypt.compare(password, user.password)) {
       req.session.userId = user.id;
-      res.redirect('/dashboard');
+      res.redirect('/campaign-dashboard');
     } else {
       res.status(401).json({ error: 'Invalid email or password. Please check your credentials and try again.' });
     }
@@ -266,7 +266,7 @@ app.post('/reset-password', async (req, res) => {
     
     res.json({ 
       message: 'Password reset successful. You are now logged in.',
-      redirect: '/dashboard'
+      redirect: '/campaign-dashboard'
     });
     
   } catch (err) {
@@ -307,7 +307,7 @@ app.post('/register', authLimiter, async (req, res) => {
     await logAuditEvent(result.lastInsertRowid || result.insertId, 'user_registered', 'users', result.lastInsertRowid || result.insertId, req.ip);
     
     req.session.userId = result.lastInsertRowid || result.insertId;
-    res.redirect('/dashboard');
+    res.redirect('/campaign-dashboard');
   } catch (err) {
     console.error('Registration error details:', err);
     console.error('Error code:', err.code);
